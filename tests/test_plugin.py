@@ -2,19 +2,19 @@
 # -*- coding: utf-8 -*-
 
 """
-test_bigchaindbcoalaip
+test_plugin
 ----------------------------------
 
-Tests for `bigchaindbcoalaip` module.
+Tests for `coalaip_bigchaindb` ledger plugin.
 """
 
 import pytest
 
 
-from bigchaindbcoalaip import bigchaindbcoalaip
+from coalaip_bigchaindb import plugin
 
 
-class TestBigchaindbcoalaip(object):
+class TestPlugin(object):
 
     @classmethod
     def setup_class(cls):
@@ -26,4 +26,3 @@ class TestBigchaindbcoalaip(object):
     @classmethod
     def teardown_class(cls):
         pass
-

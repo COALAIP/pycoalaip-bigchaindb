@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -32,20 +32,26 @@ docs_require = [
 ]
 
 setup(
-    name='bigchaindbcoalaip',
+    name='coalaip-bigchaindb',
     version='0.1.0',
-    description="BigchainDB ledger plugin for COALA IP",
+    description="BigchainDB ledger plugin for COALA IP's Python reference implementation",
     long_description=readme + '\n\n' + history,
     author="BigchainDB",
     author_email='dev@bigchaindb.com',
-    url='https://github.com/bigchaindb/bigchaindbcoalaip',
-    packages=['bigchaindbcoalaip'],
-    package_dir={'bigchaindbcoalaip': 'bigchaindbcoalaip'},
+    url='https://github.com/bigchaindb/pycoalaip-bigchaindb',
+    packages=find_packages(exclude=['tests*']),
     include_package_data=True,
     install_requires=install_requires,
+    tests_require=tests_require,
+    extras_require={
+        'test': tests_require,
+        'dev': dev_require + tests_require + docs_require,
+        'docs': docs_require,
+    },
+    test_suite='tests',
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords='bigchaindbcoalaip',
+    keywords=['coalaip', 'coalaip plugin'],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -55,11 +61,4 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    test_suite='tests',
-    tests_require=tests_require,
-    extras_require={
-        'test': tests_require,
-        'dev': dev_require + tests_require + docs_require,
-        'docs': docs_require,
-    },
 )

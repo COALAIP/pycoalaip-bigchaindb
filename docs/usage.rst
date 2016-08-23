@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use bigchaindb-coalaip in a project::
+To use pycoalaip-bigchaindb in a project::
 
-    import bigchaindbcoalaip
+    import coalaip_bigchaindb
