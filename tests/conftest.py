@@ -84,6 +84,23 @@ def manifestation_model_json():
 
 
 @fixture
+def rights_assignment_model_jsonld():
+    return {
+        '@context': 'http://schema.org/',
+        '@type': 'RightsTransferAction',
+        'transferContract': 'https://ipdb.s3.amazonaws.com/1234567890.pdf'
+    }
+
+
+@fixture
+def rights_assignment_model_json():
+    return {
+        'type': 'RightsTransferAction',
+        'transferContract': 'https://ipdb.s3.amazonaws.com/1234567890.pdf'
+    }
+
+
+@fixture
 def persisted_manifestation(bdb_driver, manifestation_model_jsonld,
                             alice_keypair):
     return bdb_driver.create(

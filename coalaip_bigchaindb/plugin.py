@@ -90,7 +90,7 @@ class Plugin:
 
         return tx_json['id']
 
-    def transfer(self, persist_id, *, from_user, to_user):
+    def transfer(self, persist_id, transfer_payload, *, from_user, to_user):
         """Transfer the entity whose creation transaction matches
         'persist_id' from the current owner ('from_user') to a new owner
         ('to_user')
@@ -98,6 +98,8 @@ class Plugin:
         Args:
             persist_id (str): the id of the creation transaction for the
                 entity on the connected BigchainDB instance
+            transfer_payload (dict): a dict holding the transfer's
+                payload
             from_user (tuple): a tuple holding the current owner's
                 verifying key ('verifying_key') and signing key
                 ('signing_key')

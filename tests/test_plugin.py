@@ -41,11 +41,15 @@ def test_get_model_status(plugin, persisted_manifestation):
 
 
 @mark.skip(reason='transfer() not implemented yet')
-def test_transfer(plugin, bdb_driver, persisted_manifestation,
-                  alice_keypair, bob_keypair):
+@mark.parametrize(
+    'model_name',
+    ('rights_assignment_model_jsonld', 'rights_assignment_model_json'))
+def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
+                  alice_keypair, bob_keypair, request):
+    model_data = request.getfixturevalue(model_name)
     tx_id = persisted_manifestation['id']
 
-    transfer_tx_id = plugin.transfer(tx_id,
+    transfer_tx_id = plugin.transfer(tx_id, model_data,
                                      from_user=alice_keypair,
                                      to_user=bob_keypair)
 
