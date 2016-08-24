@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+  plugin:
+    build:
+      context: .
+      dockerfile: ./compose/plugin/Dockerfile
+    volumes:
+      - ./docs:/usr/src/app/docs
+      - ./tests:/usr/src/app/tests
+      - ./coalaip_bigchaindb:/usr/src/app/coalaip_bigchaindb
+      - ./setup.py:/usr/src/app/setup.py
+    environment:
+      BDB_HOST: server
+    command: py.test -v
+  rethinkdb:
+    image: rethinkdb
+    ports:
+      - "58585:8080"
+      - "28015"
+  server:
+    build: ./compose/server
+    environment:
+      BIGCHAINDB_DATABASE_HOST: rethinkdb
+      BIGCHAINDB_API_ENDPOINT: http://server:9984/api/v1
+      BIGCHAINDB_SERVER_BIND: 0.0.0.0:9984
+    ports:
+        - "32769:9984"
+    command: bigchaindb start
