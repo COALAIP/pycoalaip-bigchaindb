@@ -1,28 +1,28 @@
-==================
-bigchaindb-coalaip
-==================
+====================
+pycoalaip-bigchaindb
+====================
 
 
-.. image:: https://img.shields.io/pypi/v/bigchaindbcoalaip.svg
-        :target: https://pypi.python.org/pypi/bigchaindbcoalaip
+.. image:: https://img.shields.io/pypi/v/pycoalaip-bigchaindb.svg
+        :target: https://pypi.python.org/pypi/pycoalaip-bigchaindb
 
-.. image:: https://img.shields.io/travis/bigchaindb/bigchaindbcoalaip.svg
-        :target: https://travis-ci.org/bigchaindb/bigchaindbcoalaip
+.. image:: https://img.shields.io/travis/bigchaindb/pycoalaip-bigchaindb.svg
+        :target: https://travis-ci.org/bigchaindb/pycoalaip-bigchaindb
 
-.. image:: https://readthedocs.org/projects/bigchaindbcoalaip/badge/?version=latest
-        :target: https://bigchaindbcoalaip.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/pycoalaip-bigchaindb/badge/?version=latest
+        :target: https://pycoalaip-bigchaindb.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://pyup.io/repos/github/bigchaindb/bigchaindbcoalaip/shield.svg
-     :target: https://pyup.io/repos/github/bigchaindb/bigchaindbcoalaip/
+.. image:: https://pyup.io/repos/github/bigchaindb/pycoalaip-bigchaindb/shield.svg
+     :target: https://pyup.io/repos/github/bigchaindb/pycoalaip-bigchaindb/
      :alt: Updates
 
 
-BigchainDB ledger plugin for COALA IP
+BigchainDB ledger plugin for `COALA IP's Python reference implementation`_
 
 
 * Free software: Apache Software License 2.0
-* Documentation: https://bigchaindbcoalaip.readthedocs.io.
+* Documentation: https://pycoalaip-bigchaindb.readthedocs.io.
 
 
 Features
@@ -35,6 +35,6 @@ Credits
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
+.. _`COALA IP's Python reference implementation`: https://github.com/bigchaindb/pycoalaip
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-
