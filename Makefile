@@ -50,38 +50,31 @@ lint: ## check style with flake8
 	flake8 coalaip_bigchaindb tests
 
 test: ## run tests quickly with the default Python
-	pytest
+	pytest -v
 
+test-cov: ## run tests with coverage
+	py.test -v --cov=coalaip_bigchaindb
 
 test-all: ## run tests on every Python version with tox
 	tox
 
-coverage: ## check code coverage quickly with the default Python
-	coverage run --source coalaip_bigchaindb py.test
-
-		coverage report -m
-		coverage html
-		$(BROWSER) htmlcov/index.html
-
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/coalaip-bigchaindb.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ coalaip-bigchaindb
+	sphinx-apidoc -o docs/ coalaip_bigchaindb
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
 
-servedocs: docs ## compile the docs watching for changes
-	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
-
-release: clean ## package and upload a release
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+release: clean dist ## make ready-to-release package
+	@echo "\033[1mUse '$ twine upload dist/*' to release the package\033[0m"
 
 dist: clean ## builds source and wheel package
 	python setup.py sdist
 	python setup.py bdist_wheel
-	ls -l dist
+	@echo "\n--------Ready for release--------\n"
+	ls -d1 dist/*.*
+	@echo "\n---------------------------------\n"
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
