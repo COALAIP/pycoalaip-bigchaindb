@@ -9,7 +9,9 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-install_requires = []
+install_requires = [
+    'bigchaindb_driver>=0.0.3',
+]
 
 tests_require = [
     'coverage',
@@ -29,6 +31,10 @@ docs_require = [
     'sphinx-autobuild',
     'sphinxcontrib-napoleon>=0.4.4',
     'sphinx_rtd_theme',
+]
+
+dependency_links = [
+    'git+https://github.com/bigchaindb/bigchaindb-driver.git#egg=bigchaindb_driver-0.0.3',
 ]
 
 setup(
@@ -61,4 +67,5 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
+    dependency_links=dependency_links,
 )

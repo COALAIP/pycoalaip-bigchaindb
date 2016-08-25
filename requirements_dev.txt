@@ -8,3 +8,6 @@ coverage==4.1
 pytest==3.0.1
 pytest-cov
 Sphinx==1.4.4
+sphinx-rtd-theme
+git+https://github.com/bigchaindb/bigchaindb.git
+git+https://github.com/bigchaindb/bigchaindb-driver.git#egg=bigchaindb_driver-0.0.3
