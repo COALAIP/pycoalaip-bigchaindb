@@ -12,7 +12,7 @@ services:
       - ./setup.py:/usr/src/app/setup.py
     environment:
       BDB_HOST: server
-    command: py.test -v
+    command: pytest -v
   rethinkdb:
     image: rethinkdb
     ports:
