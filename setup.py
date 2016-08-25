@@ -33,7 +33,7 @@ docs_require = [
 
 setup(
     name='coalaip-bigchaindb',
-    version='0.1.0',
+    version='0.0.1.dev1',
     description="BigchainDB ledger plugin for COALA IP's Python reference implementation",
     long_description=readme + '\n\n' + history,
     author="BigchainDB",
@@ -51,7 +51,7 @@ setup(
     test_suite='tests',
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords=['coalaip', 'coalaip plugin'],
+    keywords=['coalaip', 'coalaip plugin', 'bigchaindb'],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',

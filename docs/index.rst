@@ -6,6 +6,8 @@
 Welcome to pycoalaip-bigchaindb's documentation!
 ================================================
 
+.. important:: **Development Status: Pre-Alpha**
+
 Contents:
 
 .. toctree::
