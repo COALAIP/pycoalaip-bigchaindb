@@ -15,9 +15,10 @@ def test_create_user(plugin):
     assert isinstance(user.signing_key, str)
 
 
-@mark.parametrize(
-    'model_name',
-    ('manifestation_model_jsonld', 'manifestation_model_json'))
+@mark.parametrize('model_name', [
+    'manifestation_model_jsonld',
+    'manifestation_model_json'
+])
 def test_save_model_jsonld(plugin, bdb_driver, model_name, alice_keypair,
                            request):
     model_data = request.getfixturevalue(model_name)
@@ -43,9 +44,10 @@ def test_get_model_status(plugin, persisted_manifestation):
 
 
 @mark.skip(reason='transfer() not implemented yet')
-@mark.parametrize(
-    'model_name',
-    ('rights_assignment_model_jsonld', 'rights_assignment_model_json'))
+@mark.parametrize('model_name', [
+    'rights_assignment_model_jsonld',
+    'rights_assignment_model_json'
+])
 def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
                   alice_keypair, bob_keypair, request):
     model_data = request.getfixturevalue(model_name)
