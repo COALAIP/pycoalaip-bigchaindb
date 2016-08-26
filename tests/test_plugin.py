@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from time import sleep
-from pytest import mark
+from pytest import mark, fail
 
 
 def test_init_connects_to_driver(plugin):
@@ -23,10 +23,12 @@ def test_save_model_jsonld(plugin, bdb_driver, model_name, alice_keypair,
     model_data = request.getfixturevalue(model_name)
     tx_id = plugin.save(model_data, user=alice_keypair)
 
-    # Sleep to give BigchainDB some time to process the transaction
-    sleep(5)
+    # Poll BigchainDB for the result
+    tx = _poll_result(
+        lambda: bdb_driver.transactions.retrieve(tx_id),
+        _bdb_transaction_test
+    )
 
-    tx = bdb_driver.transactions.retrieve(tx_id)
     tx_payload = tx['transaction']['data']['payload']
     tx_new_owners = tx['transaction']['conditions'][0]['owners_after']
     assert tx['id'] == tx_id
@@ -53,10 +55,12 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
                                      from_user=alice_keypair,
                                      to_user=bob_keypair)
 
-    # Sleep to give BigchainDB some time to process the transaction
-    sleep(5)
+    # Poll BigchainDB for the result
+    transfer_tx = _poll_result(
+        lambda: bdb_driver.transactions.retrieve(transfer_tx_id),
+        _bdb_transaction_test
+    )
 
-    transfer_tx = bdb_driver.transactions.retrieve(transfer_tx_id)
     transfer_tx_fulfillments = transfer_tx['transaction']['fulfillments']
     transfer_tx_conditions = transfer_tx['transaction']['conditions']
     transfer_tx_prev_owners = transfer_tx_fulfillments[0]['owners_before']
@@ -67,3 +71,32 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
 
 
 # TODO: add error case tests
+
+def _poll_result(fn, result_test_fn, *, max_checks=5, interval=1):
+    """Polling utility for cases where we need to wait for BigchainDB
+    processing. After 'max_checks' attempts, will fail the test with the
+    last result.
+
+    Args:
+        fn (func): polling function to invoke
+        result_test_fn (func): test function to validate the result of
+            the polling function; return true if the result is valid and
+            can be returned
+        max_checks (int): maximum poll attempts before failing test
+        interval (num): interval between each poll attempt
+
+    Returns:
+        (any): the result of 'fn' if it passed validation
+    """
+    for _ in range(max_checks):
+        sleep(interval)
+
+        result = fn()
+        if result_test_fn(result):
+            return result
+
+    fail("Polling result failed with result: '{}'".format(result))
+
+
+def _bdb_transaction_test(tx_result):
+    return tx_result.get('status') != 404 and tx_result.get('id')
