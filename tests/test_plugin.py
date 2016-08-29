@@ -91,11 +91,15 @@ def _poll_result(fn, result_test_fn, *, max_checks=5, interval=1):
         (any): the result of 'fn' if it passed validation
     """
     for _ in range(max_checks):
+        try:
+            result = fn()
+        except Exception:
+            # Just fail this polling instance and try again
+            pass
+        else:
+            if result_test_fn(result):
+                return result
         sleep(interval)
-
-        result = fn()
-        if result_test_fn(result):
-            return result
 
     fail("Polling result failed with result: '{}'".format(result))
 
