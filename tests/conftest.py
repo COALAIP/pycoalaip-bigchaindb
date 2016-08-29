@@ -103,7 +103,7 @@ def rights_assignment_model_json():
 @fixture
 def persisted_manifestation(bdb_driver, manifestation_model_jsonld,
                             alice_keypair):
-    return bdb_driver.create(
+    return bdb_driver.transactions.create(
         manifestation_model_jsonld,
-        verifying_key=alice_keypair.vk,
-        signing_key=alice_keypair.sk)
+        verifying_key=alice_keypair.verifying_key,
+        signing_key=alice_keypair.signing_key)

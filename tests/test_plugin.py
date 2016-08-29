@@ -37,10 +37,23 @@ def test_save_model_jsonld(plugin, bdb_driver, model_name, alice_keypair,
     assert tx_new_owners[0] == alice_keypair.verifying_key
 
 
-@mark.skip(reason='get_status() not implemented yet')
-def test_get_model_status(plugin, persisted_manifestation):
-    status = plugin.get_status(persisted_manifestation['id'])
-    assert status in (None, 'valid', 'invalid', 'undecided', 'backlog')
+def test_get_model_status(plugin, bdb_driver, persisted_manifestation):
+    tx_id = persisted_manifestation['id']
+
+    # Poll BigchainDB for the initial status
+    _poll_result(
+        lambda: plugin.get_status(tx_id),
+        lambda result: result['status'] in (
+            'valid', 'invalid', 'undecided', 'backlog')
+    )
+
+    # Poll BigchainDB until the transaction validates; will fail test if the
+    # transaction's status doesn't become valid by the end of the timeout
+    # period.
+    _poll_result(
+        lambda: plugin.get_status(tx_id),
+        lambda result: result['status'] == 'valid'
+    )
 
 
 @mark.skip(reason='transfer() not implemented yet')
