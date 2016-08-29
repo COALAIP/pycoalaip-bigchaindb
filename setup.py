@@ -14,11 +14,12 @@ install_requires = [
 ]
 
 tests_require = [
-    'coverage',
-    'pep8',
-    'pyflakes',
-    'pylint',
+    'tox>=2.3.1',
+    'coverage>=4.1',
+    'flake8>=2.6.0',
+    'pytest>=3.0.1',
     'pytest-cov',
+    'pytest-mock',
 ]
 
 dev_require = [
@@ -27,7 +28,7 @@ dev_require = [
 ]
 
 docs_require = [
-    'Sphinx>=1.3.5',
+    'Sphinx>=1.4.4',
     'sphinx-autobuild',
     'sphinxcontrib-napoleon>=0.4.4',
     'sphinx_rtd_theme',
@@ -35,6 +36,7 @@ docs_require = [
 
 dependency_links = [
     'git+https://github.com/bigchaindb/bigchaindb-driver.git#egg=bigchaindb_driver-0.0.3',
+    'git+https://github.com/bigchaindb/pycoalaip.git#egg=coalaip-0.0.2',
 ]
 
 setup(

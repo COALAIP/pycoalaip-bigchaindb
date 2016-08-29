@@ -1,13 +1,9 @@
 pip==8.1.2
 bumpversion==0.5.3
 wheel==0.29.0
-watchdog==0.8.3
-flake8==2.6.0
-tox==2.3.1
-coverage==4.1
-pytest==3.0.1
-pytest-cov
-Sphinx==1.4.4
-sphinx-rtd-theme
+
 git+https://github.com/bigchaindb/bigchaindb.git
 git+https://github.com/bigchaindb/bigchaindb-driver.git#egg=bigchaindb_driver-0.0.3
+git+https://github.com/bigchaindb/pycoalaip.git#egg=coalaip-0.0.2
+
+-e .[dev]
