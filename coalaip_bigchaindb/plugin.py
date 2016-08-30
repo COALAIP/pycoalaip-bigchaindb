@@ -2,11 +2,10 @@ from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from bigchaindb_driver.exceptions import DriverException, NotFoundError
 from coalaip.exceptions import EntityCreationError, EntityNotFoundError
+from coalaip.plugin import AbstractPlugin
 
 
-# TODO: inherit this from an ABC plugin provided by pycoalaip
-
-class Plugin:
+class Plugin(AbstractPlugin):
     """BigchainDB ledger plugin for COALA IP's Python reference
     implementation (LINK).
 
