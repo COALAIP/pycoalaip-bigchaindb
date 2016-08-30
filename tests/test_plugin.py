@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from time import sleep
-from pytest import mark, fail
+from pytest import mark, fail, raises
 
 
 def test_init_connects_to_driver(plugin):
@@ -37,6 +37,20 @@ def test_save_model_jsonld(plugin, bdb_driver, model_name, alice_keypair,
     assert tx_new_owners[0] == alice_keypair.verifying_key
 
 
+def test_save_raises_on_error(monkeypatch, plugin, manifestation_model_json,
+                              alice_keypair):
+    from bigchaindb_driver.exceptions import DriverException
+    from coalaip.exceptions import EntityCreationError
+
+    def mock_driver_error(*args, **kwargs):
+        raise DriverException()
+    monkeypatch.setattr(plugin.driver.transactions, 'create',
+                        mock_driver_error)
+
+    with raises(EntityCreationError):
+        plugin.save(manifestation_model_json, user=alice_keypair)
+
+
 def test_get_model_status(plugin, bdb_driver, persisted_manifestation):
     tx_id = persisted_manifestation['id']
 
@@ -54,6 +68,20 @@ def test_get_model_status(plugin, bdb_driver, persisted_manifestation):
         lambda: plugin.get_status(tx_id),
         lambda result: result['status'] == 'valid'
     )
+
+
+def test_nonfound_entity_raises_on_status(monkeypatch, plugin,
+                                          persisted_manifestation):
+    from bigchaindb_driver.exceptions import NotFoundError
+    from coalaip.exceptions import EntityNotFoundError
+
+    def mock_driver_not_found_error(*args, **kwargs):
+        raise NotFoundError()
+    monkeypatch.setattr(plugin.driver.transactions, 'status',
+                        mock_driver_not_found_error)
+
+    with raises(EntityNotFoundError):
+        plugin.get_status(persisted_manifestation['id'])
 
 
 @mark.skip(reason='transfer() not implemented yet')
@@ -84,8 +112,6 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
     assert transfer_tx_prev_owners[0] == alice_keypair.verifying_key
     assert transfer_tx_new_owners[0] == bob_keypair.verifying_key
 
-
-# TODO: add error case tests
 
 def _poll_result(fn, result_test_fn, *, max_checks=5, interval=1):
     """Polling utility for cases where we need to wait for BigchainDB
