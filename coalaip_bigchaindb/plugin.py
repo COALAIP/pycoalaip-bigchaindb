@@ -1,8 +1,10 @@
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
+from bigchaindb_driver.exceptions import DriverException, NotFoundError
+from coalaip.exceptions import EntityCreationError, EntityNotFoundError
 
 
-# FIXME: maybe this should inherit from a base plugin class provided by pycoalaip?
+# TODO: inherit this from an ABC plugin provided by pycoalaip
 
 class Plugin:
     """BigchainDB ledger plugin for COALA IP's Python reference
@@ -22,6 +24,11 @@ class Plugin:
         """
 
         self.driver = BigchainDB(*nodes)
+
+    @property
+    def type(self):
+        """(str): the type of this plugin (BigchainDB)"""
+        return 'BigchainDB'
 
     def create_user(self):
         """Create a new verifying/signing keypair for use with BigchainDB
@@ -55,13 +62,10 @@ class Plugin:
                     the connected BigchainDB instance
         """
 
-        # FIXME: how to do this return signature better
-
-        # FIXME: maybe just do this in a try/catch block if the driver throws
-        if not isinstance(persist_id, str):
-            return None
-        # FIXME: check API once implemented
-        return self.driver.transactions.get_status(persist_id)
+        try:
+            return self.driver.transactions.status(persist_id)
+        except NotFoundError:
+            raise EntityNotFoundError()
 
     def save(self, entity_data, *, user):
         """Create and assign a new entity with the given data to the
@@ -78,15 +82,19 @@ class Plugin:
 
         Returns:
             str: the id of the creation transaction for the new entity
+
+        Raises:
+            :class:`coalaip.exceptions.EntityCreationError`: if the
+                creation transaction fails
         """
 
-        # FIXME: how to do the dict arg better
-        # FIXME: should I double check the user dict?
-        # FIXME: handle error case
-        tx_json = self.driver.transactions.create(
-                entity_data,
-                verifying_key=user.verifying_key,
-                signing_key=user.signing_key)
+        try:
+            tx_json = self.driver.transactions.create(
+                    entity_data,
+                    verifying_key=user.verifying_key,
+                    signing_key=user.signing_key)
+        except DriverException as ex:
+            raise EntityCreationError(ex)
 
         return tx_json['id']
 
