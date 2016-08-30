@@ -4,6 +4,10 @@ from time import sleep
 from pytest import mark, fail, raises
 
 
+def test_plugin_type_is_bigchaindb(plugin):
+    assert plugin.type == 'BigchainDB'
+
+
 def test_init_connects_to_driver(plugin):
     from bigchaindb_driver import BigchainDB
     assert isinstance(plugin.driver, BigchainDB)
