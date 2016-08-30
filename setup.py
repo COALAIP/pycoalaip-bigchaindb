@@ -10,8 +10,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'coalaip>=0.0.2',
-    'bigchaindb_driver>=0.0.3',
+    'coalaip>=0.0.1.dev1',
+    'bigchaindb_driver>=0.0.2.dev8',
 ]
 
 tests_require = [
@@ -21,6 +21,7 @@ tests_require = [
     'pytest>=3.0.1',
     'pytest-cov',
     'pytest-mock',
+    'bigchaindb',
 ]
 
 dev_require = [
@@ -36,8 +37,8 @@ docs_require = [
 ]
 
 dependency_links = [
-    'git+https://github.com/bigchaindb/bigchaindb-driver.git#egg=bigchaindb_driver-0.0.3',
-    'git+https://github.com/bigchaindb/pycoalaip.git@init-creation-api#egg=coalaip-0.0.2',
+    'git+https://github.com/bigchaindb/bigchaindb-driver.git#egg=bigchaindb_driver-0.0.2.dev9',
+    'git+https://github.com/bigchaindb/pycoalaip.git@init-creation-api#egg=coalaip-0.0.1.dev1',
 ]
 
 setup(

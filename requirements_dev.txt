@@ -2,8 +2,6 @@ pip==8.1.2
 bumpversion==0.5.3
 wheel==0.29.0
 
-git+https://github.com/bigchaindb/bigchaindb.git
-git+https://github.com/bigchaindb/bigchaindb-driver.git#egg=bigchaindb_driver-0.0.3
-git+https://github.com/bigchaindb/pycoalaip.git#egg=coalaip-0.0.2
+-r dependency_links.txt
 
 -e .[dev]
