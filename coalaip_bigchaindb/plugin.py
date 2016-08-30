@@ -48,7 +48,7 @@ class Plugin(AbstractPlugin):
         """Get the status of an COALA IP entity on BigchainDB
 
         Args:
-            persist_id (str): the ID of the creation transaction for the
+            persist_id (str): the id of the creation transaction for the
                 entity on the connected BigchainDB instance
 
         Returns:
@@ -79,7 +79,8 @@ class Plugin(AbstractPlugin):
         Args:
             entity_data (dict): a dict holding the entity's data that
                 will be saved in a new asset's asset definition
-            user (dict|namedtuple, keyword): a dict or namedtuple
+            user (dict|namedtuple, keyword): the user to assign the
+                created entity to on BigchainDB. A dict or namedtuple
                 containing::
 
                     {
@@ -88,8 +89,7 @@ class Plugin(AbstractPlugin):
                     }
 
                 where 'verifying_key' and 'signing_key' are the user's
-                respective verifying and signing keys on the connected
-                BigchainDB instance.
+                respective verifying and signing keys.
 
         Returns:
             str: the id of the creation transaction for the new entity
