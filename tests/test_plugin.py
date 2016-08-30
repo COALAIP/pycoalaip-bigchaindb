@@ -9,8 +9,8 @@ def test_init_connects_to_driver(plugin):
     assert isinstance(plugin.driver, BigchainDB)
 
 
-def test_create_user(plugin):
-    user = plugin.create_user()
+def test_generate_user(plugin):
+    user = plugin.generate_user()
     assert isinstance(user.verifying_key, str)
     assert isinstance(user.signing_key, str)
 

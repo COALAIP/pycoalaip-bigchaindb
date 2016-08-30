@@ -30,7 +30,7 @@ class Plugin:
         """(str): the type of this plugin (BigchainDB)"""
         return 'BigchainDB'
 
-    def create_user(self):
+    def generate_user(self):
         """Create a new verifying/signing keypair for use with BigchainDB
 
         Returns:
