@@ -34,8 +34,13 @@ class Plugin:
         """Create a new verifying/signing keypair for use with BigchainDB
 
         Returns:
-            tuple: a new verifying key ('verifying_key') and signing key
-                ('signing_key') pair.
+            namedtuple: a named tuple containing a new user's verifying
+                and signing keys::
+
+                    (
+                        'verifying_key': (str),
+                        'signing_key': (str),
+                    )
         """
 
         return generate_keypair()
@@ -48,18 +53,19 @@ class Plugin:
                 entity on the connected BigchainDB instance
 
         Returns:
-            Either:
-                str: the status of the entiy; one of:
-                    - 'valid': the transaction has been written in a
-                               validated block
-                    - 'invalid': the block the transaction was in was
-                                 voted invalid
-                    - 'undecided': the block the transaction is in is
-                                   still undecided
-                    - 'backlog': the transaction is still in the backlog
-                None: if 'persist_id' is not a string or no transaction
-                    whose 'uuid' matches 'persist_id' could be found in
-                    the connected BigchainDB instance
+            str: the status of the entiy; one of:
+                - 'valid': the transaction has been written in a
+                      validated block
+                - 'invalid': the block the transaction was in was voted
+                      invalid
+                - 'undecided': the block the transaction is in is still
+                      undecided
+                - 'backlog': the transaction is still in the backlog
+
+        Raises:
+            :class:`coalaip.exceptions.EntityNotFoundError`: if no
+                transaction whose 'uuid' matches 'persist_id' could be
+                found in the connected BigchainDB instance
         """
 
         try:
@@ -74,11 +80,17 @@ class Plugin:
         Args:
             entity_data (dict): a dict holding the entity's data that
                 will be saved in a new asset's asset definition
-            user (tuple): a tuple containing:
-                'verifying_key' (str): the user's verifying key on the
-                    connected BigchainDB instance
-                'signing_key' (str): the user's signing key on the
-                    connected BigchainDB instance
+            user (dict|namedtuple, keyword): a dict or namedtuple
+                containing::
+
+                    {
+                        'verifying_key': (str),
+                        'signing_key': (str),
+                    }
+
+                where 'verifying_key' and 'signing_key' are the user's
+                respective verifying and signing keys on the connected
+                BigchainDB instance.
 
         Returns:
             str: the id of the creation transaction for the new entity
@@ -108,11 +120,11 @@ class Plugin:
                 entity on the connected BigchainDB instance
             transfer_payload (dict): a dict holding the transfer's
                 payload
-            from_user (tuple): a tuple holding the current owner's
-                verifying key ('verifying_key') and signing key
-                ('signing_key')
-            to_user (tuple): a tuple holding the new owner's verifying
-                key ('verifying_key') and signing key ('signing_key')
+            from_user (dict|namedtuple, keyword): a tuple holding the
+                current owner's verifying key and signing key (see
+                :meth:`save`)
+            to_user (dict|namedtuple, keyword): a tuple holding the new
+                owner's verifying key and signing key (see :meth:`save`)
 
         Returns:
             str: the id of the transaction transferring the entity from
