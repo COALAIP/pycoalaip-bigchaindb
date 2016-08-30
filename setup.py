@@ -49,6 +49,9 @@ setup(
     author_email='dev@bigchaindb.com',
     url='https://github.com/bigchaindb/pycoalaip-bigchaindb',
     packages=find_packages(exclude=['tests*']),
+    entry_points={
+        'coalaip_plugin': 'bigchaindb = coalaip_bigchaindb.plugin:Plugin'
+    },
     include_package_data=True,
     install_requires=install_requires,
     tests_require=tests_require,
