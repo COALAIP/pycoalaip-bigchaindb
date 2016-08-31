@@ -15,9 +15,10 @@ def alice_verifying_key():
 
 @fixture
 def alice_keypair(alice_signing_key, alice_verifying_key):
-    from bigchaindb_driver.crypto import CryptoKeypair
-    keypair = CryptoKeypair(alice_signing_key, alice_verifying_key)
-    return keypair
+    return {
+        'signing_key': alice_signing_key,
+        'verifying_key': alice_verifying_key
+    }
 
 
 @fixture
@@ -32,9 +33,10 @@ def bob_verifying_key():
 
 @fixture
 def bob_keypair(bob_signing_key, bob_verifying_key):
-    from bigchaindb_driver.crypto import CryptoKeypair
-    keypair = CryptoKeypair(bob_signing_key, bob_verifying_key)
-    return keypair
+    return {
+        'signing_key': bob_signing_key,
+        'verifying_key': bob_verifying_key
+    }
 
 
 @fixture
@@ -105,5 +107,5 @@ def persisted_manifestation(bdb_driver, manifestation_model_jsonld,
                             alice_keypair):
     return bdb_driver.transactions.create(
         manifestation_model_jsonld,
-        verifying_key=alice_keypair.verifying_key,
-        signing_key=alice_keypair.signing_key)
+        verifying_key=alice_keypair['verifying_key'],
+        signing_key=alice_keypair['signing_key'])
