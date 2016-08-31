@@ -33,16 +33,16 @@ class Plugin(AbstractPlugin):
         """Create a new verifying/signing keypair for use with BigchainDB
 
         Returns:
-            namedtuple: a named tuple containing a new user's verifying
-                and signing keys::
+            dict: a dict containing a new user's verifying and signing
+                keys::
 
-                    (
+                    {
                         'verifying_key': (str),
                         'signing_key': (str),
-                    )
+                    }
         """
 
-        return generate_keypair()
+        return generate_keypair()._asdict()
 
     def get_status(self, persist_id):
         """Get the status of an COALA IP entity on BigchainDB
@@ -79,9 +79,8 @@ class Plugin(AbstractPlugin):
         Args:
             entity_data (dict): a dict holding the entity's data that
                 will be saved in a new asset's asset definition
-            user (dict|namedtuple, keyword): the user to assign the
-                created entity to on BigchainDB. A dict or namedtuple
-                containing::
+            user (dict, keyword): the user to assign the created entity
+                to on BigchainDB. A dict containing::
 
                     {
                         'verifying_key': (str),
@@ -102,8 +101,8 @@ class Plugin(AbstractPlugin):
         try:
             tx_json = self.driver.transactions.create(
                     entity_data,
-                    verifying_key=user.verifying_key,
-                    signing_key=user.signing_key)
+                    verifying_key=user['verifying_key'],
+                    signing_key=user['signing_key'])
         except DriverException as ex:
             raise EntityCreationError(ex)
 
@@ -119,11 +118,10 @@ class Plugin(AbstractPlugin):
                 entity on the connected BigchainDB instance
             transfer_payload (dict): a dict holding the transfer's
                 payload
-            from_user (dict|namedtuple, keyword): a tuple holding the
-                current owner's verifying key and signing key (see
-                :meth:`save`)
-            to_user (dict|namedtuple, keyword): a tuple holding the new
+            from_user (dict, keyword): a dict holding the current
                 owner's verifying key and signing key (see :meth:`save`)
+            to_user (dict, keyword): a dict holding the new owner's
+                verifying key and signing key (see :meth:`save`)
 
         Returns:
             str: the id of the transaction transferring the entity from

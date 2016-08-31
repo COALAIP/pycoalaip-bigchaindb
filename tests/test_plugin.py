@@ -15,8 +15,8 @@ def test_init_connects_to_driver(plugin):
 
 def test_generate_user(plugin):
     user = plugin.generate_user()
-    assert isinstance(user.verifying_key, str)
-    assert isinstance(user.signing_key, str)
+    assert isinstance(user['verifying_key'], str)
+    assert isinstance(user['signing_key'], str)
 
 
 @mark.parametrize('model_name', [
@@ -38,7 +38,7 @@ def test_save_model_jsonld(plugin, bdb_driver, model_name, alice_keypair,
     tx_new_owners = tx['transaction']['conditions'][0]['owners_after']
     assert tx['id'] == tx_id
     assert tx_payload == model_data
-    assert tx_new_owners[0] == alice_keypair.verifying_key
+    assert tx_new_owners[0] == alice_keypair['verifying_key']
 
 
 def test_save_raises_on_error(monkeypatch, plugin, manifestation_model_json,
@@ -113,8 +113,8 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
     transfer_tx_prev_owners = transfer_tx_fulfillments[0]['owners_before']
     transfer_tx_new_owners = transfer_tx_conditions[0]['owners_after']
     assert transfer_tx['id'] == tx_id
-    assert transfer_tx_prev_owners[0] == alice_keypair.verifying_key
-    assert transfer_tx_new_owners[0] == bob_keypair.verifying_key
+    assert transfer_tx_prev_owners[0] == alice_keypair['verifying_key']
+    assert transfer_tx_new_owners[0] == bob_keypair['verifying_key']
 
 
 def _poll_result(fn, result_test_fn, *, max_checks=5, interval=1):
