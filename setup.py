@@ -9,14 +9,19 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-install_requires = []
+install_requires = [
+    'coalaip>=0.0.1.dev1',
+    'bigchaindb_driver>=0.0.2.dev10',
+]
 
 tests_require = [
-    'coverage',
-    'pep8',
-    'pyflakes',
-    'pylint',
+    'tox>=2.3.1',
+    'coverage>=4.1',
+    'flake8>=2.6.0',
+    'pytest>=3.0.1',
     'pytest-cov',
+    'pytest-mock',
+    'bigchaindb',
 ]
 
 dev_require = [
@@ -25,21 +30,28 @@ dev_require = [
 ]
 
 docs_require = [
-    'Sphinx>=1.3.5',
+    'Sphinx>=1.4.4',
     'sphinx-autobuild',
     'sphinxcontrib-napoleon>=0.4.4',
     'sphinx_rtd_theme',
 ]
 
+dependency_links = [
+    'git+https://github.com/bigchaindb/pycoalaip.git@init-creation-api#egg=coalaip-0.0.1.dev1',
+]
+
 setup(
     name='coalaip-bigchaindb',
-    version='0.1.0',
+    version='0.0.1.dev1',
     description="BigchainDB ledger plugin for COALA IP's Python reference implementation",
     long_description=readme + '\n\n' + history,
     author="BigchainDB",
     author_email='dev@bigchaindb.com',
     url='https://github.com/bigchaindb/pycoalaip-bigchaindb',
     packages=find_packages(exclude=['tests*']),
+    entry_points={
+        'coalaip_plugin': 'bigchaindb = coalaip_bigchaindb.plugin:Plugin'
+    },
     include_package_data=True,
     install_requires=install_requires,
     tests_require=tests_require,
@@ -51,7 +63,7 @@ setup(
     test_suite='tests',
     license="Apache Software License 2.0",
     zip_safe=False,
-    keywords=['coalaip', 'coalaip plugin'],
+    keywords=['coalaip', 'coalaip plugin', 'bigchaindb'],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Developers',
@@ -61,4 +73,5 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
+    dependency_links=dependency_links,
 )

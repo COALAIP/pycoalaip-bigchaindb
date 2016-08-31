@@ -79,7 +79,7 @@ Ready to contribute? Here's how to set up `pycoalaip-bigchaindb` for local devel
 5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
 
     $ flake8 coalaip_bigchaindb tests
-    $ python setup.py test or py.test
+    $ python setup.py test or pytest
     $ tox
 
    To get flake8 and tox, just pip install them into your virtualenv.
@@ -110,4 +110,12 @@ Tips
 
 To run a subset of tests::
 
-$ py.test tests.test_plugin
+$ pytest tests.test_plugin
+
+To run tests with debugging::
+
+$ pytest -s
+
+To run tests and break on errors::
+
+$ pytest --pdb

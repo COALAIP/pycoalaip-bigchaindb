@@ -18,9 +18,10 @@ pycoalaip-bigchaindb
      :alt: Updates
 
 
-BigchainDB ledger plugin for `COALA IP's Python reference implementation`_
+BigchainDB ledger plugin for `COALA IP's Python reference implementation <https://github.com/bigchaindb/pycoalaip>`_
 
 
+* Development Status: Pre-Alpha
 * Free software: Apache Software License 2.0
 * Documentation: https://pycoalaip-bigchaindb.readthedocs.io.
 
@@ -28,13 +29,13 @@ BigchainDB ledger plugin for `COALA IP's Python reference implementation`_
 Features
 --------
 
-* TODO
+* Support for creating new keypair for use with BigchainDB
+* Basic support for COALA IP entity creation
 
 Credits
 ---------
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
-.. _`COALA IP's Python reference implementation`: https://github.com/bigchaindb/pycoalaip
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
