@@ -36,10 +36,6 @@ docs_require = [
     'sphinx_rtd_theme',
 ]
 
-dependency_links = [
-    'git+https://github.com/bigchaindb/pycoalaip.git@init-creation-api#egg=coalaip-0.0.1.dev1',
-]
-
 setup(
     name='coalaip-bigchaindb',
     version='0.0.1.dev1',
@@ -73,5 +69,4 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    dependency_links=dependency_links,
 )

@@ -1,3 +1,1 @@
 --process-dependency-links
-
-git+https://github.com/bigchaindb/pycoalaip.git@init-creation-api#egg=coalaip
