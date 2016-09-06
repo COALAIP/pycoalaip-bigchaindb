@@ -21,7 +21,7 @@ pycoalaip-bigchaindb
      :alt: Updates
 
 
-BigchainDB ledger plugin for `COALA IP's Python reference implementation <https://github.com/bigchaindb/pycoalaip>`_
+BigchainDB ledger plugin for `COALA IP's Python reference implementation <https://github.com/bigchaindb/pycoalaip>`_.
 
 
 * Development Status: Pre-Alpha

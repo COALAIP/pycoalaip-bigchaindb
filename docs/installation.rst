@@ -5,14 +5,14 @@ Installation
 ============
 
 
-Stable release
---------------
+Development release
+-------------------
 
 To install pycoalaip-bigchaindb, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install pycoalaip-bigchaindb
+    $ pip install coalaip-bigchaindb
 
 This is the preferred method to install pycoalaip-bigchaindb, as it will always install the most recent stable release.
 
@@ -28,13 +28,13 @@ From sources
 
 The sources for pycoalaip-bigchaindb can be downloaded from the `Github repo`_.
 
-You can either clone the public repository:
+Clone the public repository:
 
 .. code-block:: console
 
     $ git clone git://github.com/bigchaindb/pycoalaip-bigchaindb
 
-Once you have a copy of the source, you can install it with:
+And install it with:
 
 .. code-block:: console
 
