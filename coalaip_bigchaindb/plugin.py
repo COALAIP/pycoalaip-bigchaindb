@@ -34,12 +34,12 @@ class Plugin(AbstractPlugin):
 
         Returns:
             dict: a dict containing a new user's verifying and signing
-                keys::
+            keys::
 
-                    {
-                        'verifying_key': (str),
-                        'signing_key': (str),
-                    }
+                {
+                    'verifying_key': (str),
+                    'signing_key': (str),
+                }
         """
 
         return generate_keypair()._asdict()
@@ -125,7 +125,7 @@ class Plugin(AbstractPlugin):
 
         Returns:
             str: the id of the transaction transferring the entity from
-                'from_user' to 'to_user'
+            'from_user' to 'to_user'
         """
 
         raise NotImplementedError('transfer() has not been implemented yet')
