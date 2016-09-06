@@ -3,11 +3,14 @@ pycoalaip-bigchaindb
 ====================
 
 
-.. image:: https://img.shields.io/pypi/v/pycoalaip-bigchaindb.svg
-        :target: https://pypi.python.org/pypi/pycoalaip-bigchaindb
+.. image:: https://img.shields.io/pypi/v/coalaip-bigchaindb.svg
+        :target: https://pypi.python.org/pypi/coalaip-bigchaindb
 
 .. image:: https://img.shields.io/travis/bigchaindb/pycoalaip-bigchaindb.svg
         :target: https://travis-ci.org/bigchaindb/pycoalaip-bigchaindb
+
+.. image:: https://img.shields.io/codecov/c/github/bigchaindb/pycoalaip-bigchaindb/master.svg
+    :target: https://codecov.io/github/bigchaindb/pycoalaip-bigchaindb?branch=master
 
 .. image:: https://readthedocs.org/projects/pycoalaip-bigchaindb/badge/?version=latest
         :target: https://pycoalaip-bigchaindb.readthedocs.io/en/latest/?badge=latest
@@ -18,7 +21,7 @@ pycoalaip-bigchaindb
      :alt: Updates
 
 
-BigchainDB ledger plugin for `COALA IP's Python reference implementation <https://github.com/bigchaindb/pycoalaip>`_
+BigchainDB ledger plugin for `COALA IP's Python reference implementation <https://github.com/bigchaindb/pycoalaip>`_.
 
 
 * Development Status: Pre-Alpha
