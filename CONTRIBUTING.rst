@@ -68,7 +68,7 @@ Ready to contribute? Here's how to set up `pycoalaip-bigchaindb` for local devel
 
     $ mkvirtualenv pycoalaip-bigchaindb
     $ cd pycoalaip-bigchaindb/
-    $ python setup.py develop
+    $ pip install -r requirements_dev.txt
 
 4. Create a branch for local development::
 
