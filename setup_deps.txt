@@ -1,0 +1,8 @@
+# Required dependencies for installation based on the setup.py file.
+#
+# NOTE: Pyup will automatically update these, but YOU will have to upgrade the
+# dependencies as necessary in setup.py. These are NOT used for anything other
+# than enabling notifications for outdated dependencies.
+
+coalaip==0.0.1.dev2
+bigchaindb_driver==0.0.2.dev10
