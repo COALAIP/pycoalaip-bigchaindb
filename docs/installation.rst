@@ -42,4 +42,3 @@ And install it with:
 
 
 .. _Github repo: https://github.com/bigchaindb/pycoalaip-bigchaindb
-.. _tarball: https://github.com/bigchaindb/pycoalaip-bigchaindb/tarball/master
