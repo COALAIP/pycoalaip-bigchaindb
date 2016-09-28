@@ -30,8 +30,7 @@ def test_save_model(plugin, bdb_driver, model_name, alice_keypair, request):
     # Poll BigchainDB for the result
     tx = poll_result(
         lambda: bdb_driver.transactions.retrieve(tx_id),
-        bdb_transaction_test
-    )
+        bdb_transaction_test)
 
     tx_payload = tx['transaction']['data']['payload']
     tx_new_owners = tx['transaction']['conditions'][0]['owners_after']
@@ -62,16 +61,14 @@ def test_get_persisted_model_status(plugin, bdb_driver,
     poll_result(
         lambda: plugin.get_status(tx_id),
         lambda result: result['status'] in (
-            'valid', 'invalid', 'undecided', 'backlog')
-    )
+            'valid', 'invalid', 'undecided', 'backlog'))
 
     # Poll BigchainDB until the transaction validates; will fail test if the
     # transaction's status doesn't become valid by the end of the timeout
     # period.
     poll_result(
         lambda: plugin.get_status(tx_id),
-        lambda result: result['status'] == 'valid'
-    )
+        lambda result: result['status'] == 'valid')
 
 
 def test_nonfound_entity_raises_on_status(monkeypatch, plugin,
@@ -86,6 +83,32 @@ def test_nonfound_entity_raises_on_status(monkeypatch, plugin,
 
     with raises(EntityNotFoundError):
         plugin.get_status(persisted_manifestation['id'])
+
+
+def test_load_model(plugin, bdb_driver, persisted_manifestation):
+    tx_id = persisted_manifestation['id']
+
+    # Poll BigchainDB until the persisted manifestation becomes valid
+    poll_result(
+        lambda: plugin.get_status(tx_id),
+        lambda result: bdb_transaction_test)
+
+    loaded_transaction = plugin.load(tx_id)
+    assert loaded_transaction == persisted_manifestation['transaction']['data']['payload']
+
+
+def test_load_model_raises_on_not_found(monkeypatch, plugin, bdb_driver,
+                                        persisted_manifestation):
+    from bigchaindb_driver.exceptions import NotFoundError
+    from coalaip.exceptions import EntityNotFoundError
+
+    def mock_driver_not_found_error(*args, **kwargs):
+        raise NotFoundError()
+    monkeypatch.setattr(plugin.driver.transactions, 'retrieve',
+                        mock_driver_not_found_error)
+
+    with raises(EntityNotFoundError):
+        plugin.load(persisted_manifestation['id'])
 
 
 @mark.skip(reason='transfer() not implemented yet')
@@ -105,8 +128,7 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
     # Poll BigchainDB for the result
     transfer_tx = poll_result(
         lambda: bdb_driver.transactions.retrieve(transfer_tx_id),
-        bdb_transaction_test
-    )
+        bdb_transaction_test)
 
     transfer_tx_fulfillments = transfer_tx['transaction']['fulfillments']
     transfer_tx_conditions = transfer_tx['transaction']['conditions']
