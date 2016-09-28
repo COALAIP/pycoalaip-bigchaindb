@@ -107,6 +107,30 @@ class Plugin(AbstractPlugin):
 
         return tx_json['id']
 
+    def load(self, persist_id):
+        """Load the data of the entity associated with the
+        :attr:`persist_id` from BigchainDB.
+
+        Args:
+            persist_id (str): Id of the creation transaction for the
+                entity on the connected BigchainDB instance
+
+        Returns:
+            dict: The persisted data of the entity
+
+        Raises:
+            :exc:`coalaip.exceptions.EntityNotFoundError`: If no
+                transaction whose 'uuid' matches 'persist_id' could be
+                found in the connected BigchainDB instance
+        """
+
+        try:
+            tx_json = self.driver.transactions.retrieve(persist_id)
+        except NotFoundError as ex:
+            raise EntityNotFoundError()
+
+        return tx_json['transaction']['data']['payload']
+
     def transfer(self, persist_id, transfer_payload, *, from_user, to_user):
         """Transfer the entity whose creation transaction matches
         :attr:`persist_id` from the current owner (:attr:`from_user`) to
