@@ -6,19 +6,19 @@ from coalaip.plugin import AbstractPlugin
 
 
 class Plugin(AbstractPlugin):
-    """BigchainDB ledger plugin for COALA IP's Python reference
-    implementation (LINK).
+    """BigchainDB ledger plugin for `COALA IP's Python reference
+    implementation <https://github.com/bigchaindb/pycoalaip>`_.
 
     Plugs in a BigchainDB instance as the persistence layer for COALA IP
     related actions.
     """
 
     def __init__(self, *nodes):
-        """Initialize a :class:`~coalaip_bigchaindb.Plugin` instance
-        and connect to one or more BigchainDB nodes.
+        """Initialize a :class:`~.Plugin` instance and connect to one or
+        more BigchainDB nodes.
 
         Args:
-            *nodes (str): one or more URLs of BigchainDB nodes to
+            *nodes (str): One or more URLs of BigchainDB nodes to
                 connect to as the persistence layer
         """
 
@@ -26,14 +26,15 @@ class Plugin(AbstractPlugin):
 
     @property
     def type(self):
-        """(str): the type of this plugin (BigchainDB)"""
+        """str: the type of this plugin (``'BigchainDB'``)"""
         return 'BigchainDB'
 
     def generate_user(self):
-        """Create a new verifying/signing keypair for use with BigchainDB
+        """Create a new verifying/signing keypair for use with
+        BigchainDB.
 
         Returns:
-            dict: a dict containing a new user's verifying and signing
+            dict: A dict containing a new user's verifying and signing
             keys::
 
                 {
@@ -45,24 +46,22 @@ class Plugin(AbstractPlugin):
         return generate_keypair()._asdict()
 
     def get_status(self, persist_id):
-        """Get the status of an COALA IP entity on BigchainDB
+        """Get the status of an COALA IP entity on BigchainDB.
 
         Args:
-            persist_id (str): the id of the creation transaction for the
+            persist_id (str): Id of the creation transaction for the
                 entity on the connected BigchainDB instance
 
         Returns:
-            str: the status of the entiy; one of:
-                - 'valid': the transaction has been written in a
-                      validated block
-                - 'invalid': the block the transaction was in was voted
-                      invalid
-                - 'undecided': the block the transaction is in is still
-                      undecided
-                - 'backlog': the transaction is still in the backlog
+            str: the status of the entity; one of::
+
+                'valid': the transaction has been written in a validated block
+                'invalid': the block the transaction was in was voted invalid
+                'undecided': the block the transaction is in is still undecided
+                'backlog': the transaction is still in the backlog
 
         Raises:
-            :class:`coalaip.exceptions.EntityNotFoundError`: if no
+            :exc:`coalaip.exceptions.EntityNotFoundError`: If no
                 transaction whose 'uuid' matches 'persist_id' could be
                 found in the connected BigchainDB instance
         """
@@ -74,12 +73,12 @@ class Plugin(AbstractPlugin):
 
     def save(self, entity_data, *, user):
         """Create and assign a new entity with the given data to the
-        given user's verifying key on BigchainDB
+        given user's verifying key on BigchainDB.
 
         Args:
-            entity_data (dict): a dict holding the entity's data that
+            entity_data (dict): A dict holding the entity's data that
                 will be saved in a new asset's asset definition
-            user (dict, keyword): the user to assign the created entity
+            user (dict, keyword): The user to assign the created entity
                 to on BigchainDB. A dict containing::
 
                     {
@@ -91,10 +90,10 @@ class Plugin(AbstractPlugin):
                 respective verifying and signing keys.
 
         Returns:
-            str: the id of the creation transaction for the new entity
+            str: Id of the creation transaction for the new entity
 
         Raises:
-            :class:`coalaip.exceptions.EntityCreationError`: if the
+            :exc:`coalaip.exceptions.EntityCreationError`: If the
                 creation transaction fails
         """
 
@@ -110,22 +109,24 @@ class Plugin(AbstractPlugin):
 
     def transfer(self, persist_id, transfer_payload, *, from_user, to_user):
         """Transfer the entity whose creation transaction matches
-        'persist_id' from the current owner ('from_user') to a new owner
-        ('to_user')
+        :attr:`persist_id` from the current owner (:attr:`from_user`) to
+        a new owner (:attr:`to_user`).
 
         Args:
-            persist_id (str): the id of the creation transaction for the
+            persist_id (str): Id of the creation transaction for the
                 entity on the connected BigchainDB instance
-            transfer_payload (dict): a dict holding the transfer's
+            transfer_payload (dict): A dict holding the transfer's
                 payload
-            from_user (dict, keyword): a dict holding the current
-                owner's verifying key and signing key (see :meth:`save`)
-            to_user (dict, keyword): a dict holding the new owner's
-                verifying key and signing key (see :meth:`save`)
+            from_user (dict, keyword): A dict holding the current
+                owner's verifying key and signing key (see
+                :meth:`generate_user`)
+            to_user (dict, keyword): A dict holding the new owner's
+                verifying key and signing key (see
+                :meth:`generate_user`)
 
         Returns:
-            str: the id of the transaction transferring the entity from
-            'from_user' to 'to_user'
+            str: Id of the transaction transferring the entity from
+            :attr:`from_user` to :attr:`to_user`
         """
 
         raise NotImplementedError('transfer() has not been implemented yet')
