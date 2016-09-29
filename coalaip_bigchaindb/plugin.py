@@ -4,9 +4,10 @@ from bigchaindb_driver.exceptions import DriverException, NotFoundError
 from coalaip.exceptions import (
     EntityCreationError,
     EntityNotFoundError,
-    PersistenceError,
+    EntityTransferError,
 )
 from coalaip.plugin import AbstractPlugin
+from coalaip_bigchaindb.utils import reraise_as_persistence_error_if_not
 
 
 class Plugin(AbstractPlugin):
@@ -49,6 +50,7 @@ class Plugin(AbstractPlugin):
 
         return generate_keypair()._asdict()
 
+    @reraise_as_persistence_error_if_not(EntityNotFoundError)
     def get_status(self, persist_id):
         """Get the status of an COALA IP entity on BigchainDB.
 
@@ -65,9 +67,9 @@ class Plugin(AbstractPlugin):
                 'backlog': the transaction is still in the backlog
 
         Raises:
-            :exc:`coalaip.exceptions.EntityNotFoundError`: If no
-                transaction whose 'uuid' matches :attr:`persist_id`
-                could be found in the connected BigchainDB instance
+            :exc:`coalaip.EntityNotFoundError`: If no transaction whose
+                'uuid' matches :attr:`persist_id` could be found in the
+                connected BigchainDB instance
             :exc:`~.PersistenceError`: If any other unhandled error
                 from the BigchainDB driver occurred.
         """
@@ -76,9 +78,8 @@ class Plugin(AbstractPlugin):
             return self.driver.transactions.status(persist_id)
         except NotFoundError:
             raise EntityNotFoundError()
-        except Exception as ex:
-            raise PersistenceError(error=ex)
 
+    @reraise_as_persistence_error_if_not(EntityCreationError)
     def save(self, entity_data, *, user):
         """Create and assign a new entity with the given data to the
         given user's verifying key on BigchainDB.
@@ -101,25 +102,23 @@ class Plugin(AbstractPlugin):
             str: Id of the creation transaction for the new entity
 
         Raises:
-            :exc:`coalaip.exceptions.EntityCreationError`: If the
-                creation transaction fails
+            :exc:`coalaip.EntityCreationError`: If the creation
+                transaction fails
             :exc:`~.PersistenceError`: If any other unhandled error
                 from the BigchainDB driver occurred.
         """
 
         try:
             tx_json = self.driver.transactions.create(
-                    entity_data,
-                    verifying_key=user['verifying_key'],
-                    signing_key=user['signing_key'])
-            entity_id = tx_json['id']
+                entity_data,
+                verifying_key=user['verifying_key'],
+                signing_key=user['signing_key'])
         except DriverException as ex:
             raise EntityCreationError(error=ex)
-        except Exception as ex:
-            raise PersistenceError(error=ex)
 
-        return entity_id
+        return tx_json['id']
 
+    @reraise_as_persistence_error_if_not(EntityNotFoundError)
     def load(self, persist_id):
         """Load the data of the entity associated with the
         :attr:`persist_id` from BigchainDB.
@@ -132,23 +131,22 @@ class Plugin(AbstractPlugin):
             dict: The persisted data of the entity
 
         Raises:
-            :exc:`coalaip.exceptions.EntityNotFoundError`: If no
-                transaction whose 'uuid' matches :attr:`persist_id`
-                could be found in the connected BigchainDB instance
+            :exc:`coalaip.EntityNotFoundError`: If no transaction whose
+                'uuid' matches :attr:`persist_id` could be found in the
+                connected BigchainDB instance
             :exc:`~.PersistenceError`: If any other unhandled error
                 from the BigchainDB driver occurred.
         """
 
         try:
             tx_json = self.driver.transactions.retrieve(persist_id)
-            entity_data = tx_json['transaction']['data']['payload']
-        except NotFoundError as ex:
+        except NotFoundError:
             raise EntityNotFoundError()
-        except Exception as ex:
-            raise PersistenceError(error=ex)
 
-        return entity_data
+        return tx_json['transaction']['data']['payload']
 
+    @reraise_as_persistence_error_if_not(EntityNotFoundError,
+                                         EntityTransferError)
     def transfer(self, persist_id, transfer_payload, *, from_user, to_user):
         """Transfer the entity whose creation transaction matches
         :attr:`persist_id` from the current owner (:attr:`from_user`) to
