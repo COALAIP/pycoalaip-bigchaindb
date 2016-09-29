@@ -102,10 +102,10 @@ def test_get_status_raises_persistence_error_on_error(monkeypatch, plugin,
                                                       created_manifestation):
     from coalaip.exceptions import PersistenceError
 
-    def mock_driver_not_found_error(*args, **kwargs):
+    def mock_driver_error(*args, **kwargs):
         raise Exception()
     monkeypatch.setattr(plugin.driver.transactions, 'status',
-                        mock_driver_not_found_error)
+                        mock_driver_error)
 
     with raises(PersistenceError):
         plugin.get_status(created_manifestation['id'])
@@ -135,10 +135,10 @@ def test_load_model_raises_persistence_error_on_error(monkeypatch, plugin,
                                                       created_manifestation):
     from coalaip.exceptions import PersistenceError
 
-    def mock_driver_not_found_error(*args, **kwargs):
+    def mock_driver_error(*args, **kwargs):
         raise Exception()
     monkeypatch.setattr(plugin.driver.transactions, 'retrieve',
-                        mock_driver_not_found_error)
+                        mock_driver_error)
 
     with raises(PersistenceError):
         plugin.load(created_manifestation['id'])
