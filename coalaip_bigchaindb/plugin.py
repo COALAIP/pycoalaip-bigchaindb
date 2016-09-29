@@ -1,7 +1,11 @@
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
 from bigchaindb_driver.exceptions import DriverException, NotFoundError
-from coalaip.exceptions import EntityCreationError, EntityNotFoundError
+from coalaip.exceptions import (
+    EntityCreationError,
+    EntityNotFoundError,
+    PersistenceError,
+)
 from coalaip.plugin import AbstractPlugin
 
 
@@ -64,12 +68,16 @@ class Plugin(AbstractPlugin):
             :exc:`coalaip.exceptions.EntityNotFoundError`: If no
                 transaction whose 'uuid' matches 'persist_id' could be
                 found in the connected BigchainDB instance
+            :exc:`~.PersistenceError`: If any other unhandled error
+                from the BigchainDB driver occurred.
         """
 
         try:
             return self.driver.transactions.status(persist_id)
         except NotFoundError:
             raise EntityNotFoundError()
+        except Exception as ex:
+            raise PersistenceError(error=ex)
 
     def save(self, entity_data, *, user):
         """Create and assign a new entity with the given data to the
@@ -95,6 +103,8 @@ class Plugin(AbstractPlugin):
         Raises:
             :exc:`coalaip.exceptions.EntityCreationError`: If the
                 creation transaction fails
+            :exc:`~.PersistenceError`: If any other unhandled error
+                from the BigchainDB driver occurred.
         """
 
         try:
@@ -102,10 +112,13 @@ class Plugin(AbstractPlugin):
                     entity_data,
                     verifying_key=user['verifying_key'],
                     signing_key=user['signing_key'])
+            entity_id = tx_json['id']
         except DriverException as ex:
             raise EntityCreationError(ex)
+        except Exception as ex:
+            raise PersistenceError(error=ex)
 
-        return tx_json['id']
+        return entity_id
 
     def load(self, persist_id):
         """Load the data of the entity associated with the
@@ -122,14 +135,19 @@ class Plugin(AbstractPlugin):
             :exc:`coalaip.exceptions.EntityNotFoundError`: If no
                 transaction whose 'uuid' matches 'persist_id' could be
                 found in the connected BigchainDB instance
+            :exc:`~.PersistenceError`: If any other unhandled error
+                from the BigchainDB driver occurred.
         """
 
         try:
             tx_json = self.driver.transactions.retrieve(persist_id)
+            entity_data = tx_json['transaction']['data']['payload']
         except NotFoundError as ex:
             raise EntityNotFoundError()
+        except Exception as ex:
+            raise PersistenceError(error=ex)
 
-        return tx_json['transaction']['data']['payload']
+        return entity_data
 
     def transfer(self, persist_id, transfer_payload, *, from_user, to_user):
         """Transfer the entity whose creation transaction matches
@@ -151,6 +169,10 @@ class Plugin(AbstractPlugin):
         Returns:
             str: Id of the transaction transferring the entity from
             :attr:`from_user` to :attr:`to_user`
+
+        Raises:
+            :exc:`~.PersistenceError`: If any other unhandled error
+                from the BigchainDB driver occurred.
         """
 
         raise NotImplementedError('transfer() has not been implemented yet')
