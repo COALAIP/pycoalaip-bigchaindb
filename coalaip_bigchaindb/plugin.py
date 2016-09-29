@@ -114,7 +114,7 @@ class Plugin(AbstractPlugin):
                     signing_key=user['signing_key'])
             entity_id = tx_json['id']
         except DriverException as ex:
-            raise EntityCreationError(ex)
+            raise EntityCreationError(error=ex)
         except Exception as ex:
             raise PersistenceError(error=ex)
 
