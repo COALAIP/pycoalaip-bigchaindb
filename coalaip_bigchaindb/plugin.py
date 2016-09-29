@@ -66,8 +66,8 @@ class Plugin(AbstractPlugin):
 
         Raises:
             :exc:`coalaip.exceptions.EntityNotFoundError`: If no
-                transaction whose 'uuid' matches 'persist_id' could be
-                found in the connected BigchainDB instance
+                transaction whose 'uuid' matches :attr:`persist_id`
+                could be found in the connected BigchainDB instance
             :exc:`~.PersistenceError`: If any other unhandled error
                 from the BigchainDB driver occurred.
         """
@@ -133,8 +133,8 @@ class Plugin(AbstractPlugin):
 
         Raises:
             :exc:`coalaip.exceptions.EntityNotFoundError`: If no
-                transaction whose 'uuid' matches 'persist_id' could be
-                found in the connected BigchainDB instance
+                transaction whose 'uuid' matches :attr:`persist_id`
+                could be found in the connected BigchainDB instance
             :exc:`~.PersistenceError`: If any other unhandled error
                 from the BigchainDB driver occurred.
         """
