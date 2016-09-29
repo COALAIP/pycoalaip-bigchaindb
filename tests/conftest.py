@@ -103,9 +103,23 @@ def rights_assignment_model_json():
 
 
 @fixture
-def persisted_manifestation(bdb_driver, manifestation_model_jsonld,
-                            alice_keypair):
+def created_manifestation(bdb_driver, manifestation_model_jsonld,
+                          alice_keypair):
     return bdb_driver.transactions.create(
         manifestation_model_jsonld,
         verifying_key=alice_keypair['verifying_key'],
         signing_key=alice_keypair['signing_key'])
+
+
+@fixture
+def persisted_manifestation(bdb_driver, created_manifestation):
+    from tests.utils import bdb_transaction_test, poll_result
+    created_id = created_manifestation['id']
+
+    # Poll BigchainDB until the created manifestation becomes valid (and
+    # 'persisted')
+    poll_result(
+        lambda: bdb_driver.transactions.status(created_id),
+        lambda result: bdb_transaction_test)
+
+    return created_manifestation

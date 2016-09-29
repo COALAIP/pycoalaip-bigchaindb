@@ -67,9 +67,8 @@ def test_save_raises_persistence_error_on_error(monkeypatch, plugin,
         plugin.save(manifestation_model_json, user=alice_keypair)
 
 
-def test_get_persisted_model_status(plugin, bdb_driver,
-                                    persisted_manifestation):
-    tx_id = persisted_manifestation['id']
+def test_get_status(plugin, created_manifestation):
+    tx_id = created_manifestation['id']
 
     # Poll BigchainDB for the initial status
     poll_result(
@@ -86,7 +85,7 @@ def test_get_persisted_model_status(plugin, bdb_driver,
 
 
 def test_get_status_raises_not_found_error_on_not_found(monkeypatch, plugin,
-                                                        persisted_manifestation):
+                                                        created_manifestation):
     from bigchaindb_driver.exceptions import NotFoundError
     from coalaip.exceptions import EntityNotFoundError
 
@@ -96,11 +95,11 @@ def test_get_status_raises_not_found_error_on_not_found(monkeypatch, plugin,
                         mock_driver_not_found_error)
 
     with raises(EntityNotFoundError):
-        plugin.get_status(persisted_manifestation['id'])
+        plugin.get_status(created_manifestation['id'])
 
 
 def test_get_status_raises_persistence_error_on_error(monkeypatch, plugin,
-                                                      persisted_manifestation):
+                                                      created_manifestation):
     from coalaip.exceptions import PersistenceError
 
     def mock_driver_not_found_error(*args, **kwargs):
@@ -109,23 +108,17 @@ def test_get_status_raises_persistence_error_on_error(monkeypatch, plugin,
                         mock_driver_not_found_error)
 
     with raises(PersistenceError):
-        plugin.get_status(persisted_manifestation['id'])
+        plugin.get_status(created_manifestation['id'])
 
 
-def test_load_model(plugin, bdb_driver, persisted_manifestation):
+def test_load_model(plugin, persisted_manifestation):
     tx_id = persisted_manifestation['id']
-
-    # Poll BigchainDB until the persisted manifestation becomes valid
-    poll_result(
-        lambda: plugin.get_status(tx_id),
-        lambda result: bdb_transaction_test)
-
     loaded_transaction = plugin.load(tx_id)
     assert loaded_transaction == persisted_manifestation['transaction']['data']['payload']
 
 
 def test_load_model_raises_not_found_error_on_not_found(
-        monkeypatch, plugin, bdb_driver, persisted_manifestation):
+        monkeypatch, plugin, created_manifestation):
     from bigchaindb_driver.exceptions import NotFoundError
     from coalaip.exceptions import EntityNotFoundError
 
@@ -135,12 +128,11 @@ def test_load_model_raises_not_found_error_on_not_found(
                         mock_driver_not_found_error)
 
     with raises(EntityNotFoundError):
-        plugin.load(persisted_manifestation['id'])
+        plugin.load(created_manifestation['id'])
 
 
 def test_load_model_raises_persistence_error_on_error(monkeypatch, plugin,
-                                                      bdb_driver,
-                                                      persisted_manifestation):
+                                                      created_manifestation):
     from coalaip.exceptions import PersistenceError
 
     def mock_driver_not_found_error(*args, **kwargs):
@@ -149,7 +141,7 @@ def test_load_model_raises_persistence_error_on_error(monkeypatch, plugin,
                         mock_driver_not_found_error)
 
     with raises(PersistenceError):
-        plugin.load(persisted_manifestation['id'])
+        plugin.load(created_manifestation['id'])
 
 
 @mark.skip(reason='transfer() not implemented yet')
