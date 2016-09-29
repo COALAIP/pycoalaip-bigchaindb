@@ -1,6 +1,6 @@
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
-from bigchaindb_driver.exceptions import DriverException, NotFoundError
+from bigchaindb_driver.exceptions import BigchaindbException, NotFoundError
 from coalaip.exceptions import (
     EntityCreationError,
     EntityNotFoundError,
@@ -113,7 +113,7 @@ class Plugin(AbstractPlugin):
                 entity_data,
                 verifying_key=user['verifying_key'],
                 signing_key=user['signing_key'])
-        except DriverException as ex:
+        except BigchaindbException as ex:
             raise EntityCreationError(error=ex)
 
         return tx_json['id']

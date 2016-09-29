@@ -41,11 +41,11 @@ def test_save_model(plugin, bdb_driver, model_name, alice_keypair, request):
 
 def test_save_raises_entity_creation_error_on_creation_error(
         monkeypatch, plugin, manifestation_model_json, alice_keypair):
-    from bigchaindb_driver.exceptions import DriverException
+    from bigchaindb_driver.exceptions import BigchaindbException
     from coalaip.exceptions import EntityCreationError
 
     def mock_driver_error(*args, **kwargs):
-        raise DriverException()
+        raise BigchaindbException()
     monkeypatch.setattr(plugin.driver.transactions, 'create',
                         mock_driver_error)
 
