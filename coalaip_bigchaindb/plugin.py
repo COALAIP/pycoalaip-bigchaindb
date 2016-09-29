@@ -210,7 +210,8 @@ class Plugin(AbstractPlugin):
 
     @reraise_as_persistence_error_if_not(EntityNotFoundError,
                                          EntityTransferError)
-    def transfer(self, persist_id, transfer_payload, *, from_user, to_user):
+    def transfer(self, persist_id, transfer_payload=None, *, from_user,
+                 to_user):
         """Transfer the entity whose creation transaction matches
         :attr:`persist_id` from the current owner (:attr:`from_user`) to
         a new owner (:attr:`to_user`).
@@ -218,8 +219,8 @@ class Plugin(AbstractPlugin):
         Args:
             persist_id (str): Id of the creation transaction for the
                 entity on the connected BigchainDB instance
-            transfer_payload (dict): A dict holding the transfer's
-                payload
+            transfer_payload (dict, optional): A dict holding the
+                transfer's payload
             from_user (dict, keyword): A dict holding the current
                 owner's public key and private key (see
                 :meth:`generate_user`)
