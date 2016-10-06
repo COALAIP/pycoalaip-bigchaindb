@@ -14,8 +14,9 @@ from coalaip.exceptions import (
 )
 from coalaip.plugin import AbstractPlugin
 from coalaip_bigchaindb.utils import (
+    make_transfer_tx,
+    order_transactions,
     reraise_as_persistence_error_if_not,
-    order_transactions
 )
 
 
@@ -109,8 +110,8 @@ class Plugin(AbstractPlugin):
         """Get the status of an COALA IP entity on BigchainDB.
 
         Args:
-            persist_id (str): Id of the creation transaction for the
-                entity on the connected BigchainDB instance
+            persist_id (str): Asset id of the entity on the connected
+                BigchainDB instance
 
         Returns:
             str: the status of the entity; one of::
@@ -153,7 +154,7 @@ class Plugin(AbstractPlugin):
                 respective public and private keys.
 
         Returns:
-            str: Id of the creation transaction for the new entity
+            str: Asset id of the new entity
 
         Raises:
             :exc:`coalaip.EntityCreationError`: If the creation
@@ -187,16 +188,16 @@ class Plugin(AbstractPlugin):
         :attr:`persist_id` from BigchainDB.
 
         Args:
-            persist_id (str): Id of the creation transaction for the
-                entity on the connected BigchainDB instance
+            persist_id (str): Asset id of the entity being loaded on the
+                connected BigchainDB instance
 
         Returns:
             dict: The persisted data of the entity
 
         Raises:
-            :exc:`coalaip.EntityNotFoundError`: If no transaction whose
-                'uuid' matches :attr:`persist_id` could be found in the
-                connected BigchainDB instance
+            :exc:`coalaip.EntityNotFoundError`: If no asset whose id
+            matches :attr:`persist_id` could be found in the connected
+            BigchainDB instance
             :exc:`~.PersistenceError`: If any other unhandled error
                 from the BigchainDB driver occurred.
         """
@@ -206,19 +207,22 @@ class Plugin(AbstractPlugin):
         except NotFoundError:
             raise EntityNotFoundError()
 
-        return tx_json['asset']['data']
+        if tx_json['operation'] == 'CREATE':
+            return tx_json['asset']['data']
+        else:
+            return tx_json['metadata']
 
     @reraise_as_persistence_error_if_not(EntityNotFoundError,
                                          EntityTransferError)
     def transfer(self, persist_id, transfer_payload=None, *, from_user,
                  to_user):
-        """Transfer the entity whose creation transaction matches
-        :attr:`persist_id` from the current owner (:attr:`from_user`) to
-        a new owner (:attr:`to_user`).
+        """Transfer the entity matching the given :attr:`persist_id`
+        from the current owner (:attr:`from_user`) to a new owner
+        (:attr:`to_user`).
 
         Args:
-            persist_id (str): Id of the creation transaction for the
-                entity on the connected BigchainDB instance
+            persist_id (str): Asset id of the entity on the connected
+                BigchainDB instance
             transfer_payload (dict, optional): A dict holding the
                 transfer's payload
             from_user (dict, keyword): A dict holding the current
@@ -233,8 +237,38 @@ class Plugin(AbstractPlugin):
             :attr:`from_user` to :attr:`to_user`
 
         Raises:
+            :exc:`coalaip.EntityNotFoundError`: If no asset whose id
+                matches :attr:`persist_id` could be found in the
+                connected BigchainDB instance
+            :exc:`coalaip.EntityTransferError`: If the transfer
+                transaction fails
             :exc:`~.PersistenceError`: If any other unhandled error
                 from the BigchainDB driver occurred.
         """
 
-        raise NotImplementedError('transfer() has not been implemented yet')
+        try:
+            ordered_tx = order_transactions(
+                self.driver.transactions.get(asset_id=persist_id))
+            last_tx = ordered_tx[-1]
+        except NotFoundError:
+            raise EntityNotFoundError()
+
+        try:
+            transfer_tx = make_transfer_tx(self.driver, input_tx=last_tx,
+                                           recipients=to_user['public_key'],
+                                           metadata=transfer_payload)
+        except BigchaindbException as ex:
+            raise EntityTransferError(error=ex) from ex
+
+        try:
+            fulfilled_tx = self.driver.transactions.fulfill(
+                transfer_tx, private_keys=from_user['private_key'])
+        except MissingPrivateKeyError as ex:
+            raise EntityTransferError(error=ex) from ex
+
+        try:
+            transfer_json = self.driver.transactions.send(fulfilled_tx)
+        except (TransportError, ConnectionError) as ex:
+            raise EntityTransferError(error=ex) from ex
+
+        return transfer_json['id']
