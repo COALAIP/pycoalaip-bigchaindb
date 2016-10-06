@@ -90,10 +90,10 @@ def test_save_model(plugin, bdb_driver, model_name, alice_keypair, request):
     tx = poll_bdb_transaction(bdb_driver, tx_id)
 
     tx_payload = tx['asset']['data']
-    tx_new_owners = tx['outputs'][0]['public_keys']
+    tx_recipients = tx['outputs'][0]['public_keys']
     assert tx['id'] == tx_id
     assert tx_payload == model_data
-    assert tx_new_owners[0] == alice_keypair['public_key']
+    assert tx_recipients[0] == alice_keypair['public_key']
 
 
 def test_save_raises_entity_creation_error_on_creation_error(
@@ -159,7 +159,33 @@ def test_load_model(plugin, persisted_manifestation):
     assert loaded_transaction == persisted_manifestation['asset']['data']
 
 
-@mark.skip(reason='transfer() not implemented yet')
+def test_load_model_raises_not_found_error_on_not_found(
+        monkeypatch, plugin, created_manifestation):
+    from bigchaindb_driver.exceptions import NotFoundError
+    from coalaip.exceptions import EntityNotFoundError
+
+    def mock_driver_not_found_error(*args, **kwargs):
+        raise NotFoundError()
+    monkeypatch.setattr(plugin.driver.transactions, 'retrieve',
+                        mock_driver_not_found_error)
+
+    with raises(EntityNotFoundError):
+        plugin.load(created_manifestation['id'])
+
+
+def test_load_model_raises_persistence_error_on_error(monkeypatch, plugin,
+                                                      created_manifestation):
+    from coalaip.exceptions import PersistenceError
+
+    def mock_driver_error(*args, **kwargs):
+        raise Exception()
+    monkeypatch.setattr(plugin.driver.transactions, 'retrieve',
+                        mock_driver_error)
+
+    with raises(PersistenceError):
+        plugin.load(created_manifestation['id'])
+
+
 @mark.parametrize('model_name', [
     'rights_assignment_model_jsonld',
     'rights_assignment_model_json'
@@ -167,22 +193,71 @@ def test_load_model(plugin, persisted_manifestation):
 def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
                   alice_keypair, bob_keypair, request):
     model_data = request.getfixturevalue(model_name)
-    tx_id = persisted_manifestation['id']
+    entity_id = persisted_manifestation['id']
 
-    transfer_tx_id = plugin.transfer(tx_id, model_data,
+    transfer_tx_id = plugin.transfer(entity_id, model_data,
                                      from_user=alice_keypair,
                                      to_user=bob_keypair)
 
     # Poll BigchainDB for the result
     transfer_tx = poll_bdb_transaction(bdb_driver, transfer_tx_id)
 
-    transfer_tx_fulfillments = transfer_tx['inputs']
-    transfer_tx_conditions = transfer_tx['outputs']
-    transfer_tx_prev_owners = transfer_tx_fulfillments[0]['owners_before']
-    transfer_tx_new_owners = transfer_tx_conditions[0]['public_keys']
-    assert transfer_tx['id'] == tx_id
-    assert transfer_tx_prev_owners[0] == alice_keypair['public_key']
-    assert transfer_tx_new_owners[0] == bob_keypair['public_key']
+    transfer_tx_model_data = transfer_tx['metadata']
+    transfer_tx_inputs = transfer_tx['inputs']
+    transfer_tx_outputs = transfer_tx['outputs']
+    transfer_tx_signers = transfer_tx_inputs[0]['owners_before']
+    transfer_tx_recipients = transfer_tx_outputs[0]['public_keys']
+    assert transfer_tx_model_data == model_data
+    assert transfer_tx['id'] == transfer_tx_id
+    assert transfer_tx_signers[0] == alice_keypair['public_key']
+    assert transfer_tx_recipients[0] == bob_keypair['public_key']
+
+
+def test_transfer_can_be_retransferred(plugin, bdb_driver,
+                                       persisted_manifestation,
+                                       rights_assignment_model_json,
+                                       alice_keypair, bob_keypair,
+                                       carly_keypair):
+    entity_id = persisted_manifestation['id']
+
+    # Create an initial transfer and wait until it's valid
+    initial_transfer_tx_id = plugin.transfer(entity_id,
+                                             rights_assignment_model_json,
+                                             from_user=alice_keypair,
+                                             to_user=bob_keypair)
+
+    poll_bdb_transaction_valid(bdb_driver, initial_transfer_tx_id)
+
+    # Create a second transfer using the new owner and wait until it's valid
+    second_transfer_tx_id = plugin.transfer(entity_id,
+                                            rights_assignment_model_json,
+                                            from_user=bob_keypair,
+                                            to_user=carly_keypair)
+
+    second_transfer_tx = poll_bdb_transaction(bdb_driver,
+                                              second_transfer_tx_id)
+    second_transfer_tx_signers = second_transfer_tx['inputs'][0]['owners_before']
+    second_transfer_tx_recipients = second_transfer_tx['outputs'][0]['public_keys']
+    assert second_transfer_tx['id'] == second_transfer_tx_id
+    assert second_transfer_tx_signers[0] == bob_keypair['public_key']
+    assert second_transfer_tx_recipients[0] == carly_keypair['public_key']
+
+
+
+def test_transfer_raises_transfer_error_on_transfer_error(
+        monkeypatch, plugin, alice_keypair, bob_keypair,
+        persisted_manifestation):
+    from bigchaindb_driver.exceptions import BigchaindbException
+    from coalaip.exceptions import EntityTransferError
+    tx_id = persisted_manifestation['id']
+
+    def mock_driver_error(*args, **kwargs):
+        raise BigchaindbException()
+    monkeypatch.setattr(plugin.driver.transactions, 'transfer',
+                        mock_driver_error)
+
+    with raises(EntityTransferError):
+        plugin.transfer(tx_id, from_user=alice_keypair, to_user=bob_keypair)
 
 
 ###############################
@@ -208,6 +283,22 @@ def test_generic_plugin_func_on_id_raises_not_found_error_on_not_found(
 
     with raises(EntityNotFoundError):
         plugin_func(created_manifestation_id)
+
+
+def test_transfer_raises_not_found_error_on_not_found(
+        monkeypatch, plugin, alice_keypair, bob_keypair,
+        created_manifestation):
+    from bigchaindb_driver.exceptions import NotFoundError
+    from coalaip.exceptions import EntityNotFoundError
+    tx_id = created_manifestation['id']
+
+    def mock_driver_not_found_error(*args, **kwargs):
+        raise NotFoundError()
+    monkeypatch.setattr(plugin.driver.transactions, 'get',
+                        mock_driver_not_found_error)
+
+    with raises(EntityNotFoundError):
+        plugin.transfer(tx_id, from_user=alice_keypair, to_user=bob_keypair)
 
 
 ##################################
@@ -250,3 +341,19 @@ def test_save_raises_persistence_error_on_error(monkeypatch, plugin,
 
     with raises(PersistenceError):
         plugin.save(manifestation_model_json, user=alice_keypair)
+
+
+@mark.parametrize('driver_method_erroring', ['get', 'send'])
+def test_transfer_raises_persistence_error_on_error(
+        monkeypatch, plugin, alice_keypair, bob_keypair,
+        persisted_manifestation, driver_method_erroring):
+    from coalaip.exceptions import PersistenceError
+    tx_id = persisted_manifestation['id']
+
+    def mock_driver_error(*args, **kwargs):
+        raise Exception()
+    monkeypatch.setattr(plugin.driver.transactions, driver_method_erroring,
+                        mock_driver_error)
+
+    with raises(PersistenceError):
+        plugin.transfer(tx_id, from_user=alice_keypair, to_user=bob_keypair)
