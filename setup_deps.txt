@@ -5,4 +5,4 @@
 # than enabling notifications for outdated dependencies.
 
 coalaip==0.0.1.dev2
-bigchaindb_driver==0.0.2.dev10
+bigchaindb-driver==0.1.2
