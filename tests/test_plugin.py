@@ -32,7 +32,7 @@ def test_save_model(plugin, bdb_driver, model_name, alice_keypair, request):
         lambda: bdb_driver.transactions.retrieve(tx_id),
         bdb_transaction_test)
 
-    tx_payload = tx['transaction']['data']['payload']
+    tx_payload = tx['transaction']['asset']['data']
     tx_new_owners = tx['transaction']['conditions'][0]['owners_after']
     assert tx['id'] == tx_id
     assert tx_payload == model_data
@@ -46,7 +46,22 @@ def test_save_raises_entity_creation_error_on_creation_error(
 
     def mock_driver_error(*args, **kwargs):
         raise BigchaindbException()
-    monkeypatch.setattr(plugin.driver.transactions, 'create',
+    monkeypatch.setattr(plugin.driver.transactions, 'prepare',
+                        mock_driver_error)
+
+    with raises(EntityCreationError):
+        plugin.save(manifestation_model_json, user=alice_keypair)
+
+
+def test_save_raises_entity_creation_error_on_missing_key(monkeypatch, plugin,
+                                                          manifestation_model_json,
+                                                          alice_keypair):
+    from bigchaindb_driver.exceptions import MissingSigningKeyError
+    from coalaip.exceptions import EntityCreationError
+
+    def mock_driver_error(*args, **kwargs):
+        raise MissingSigningKeyError()
+    monkeypatch.setattr(plugin.driver.transactions, 'fulfill',
                         mock_driver_error)
 
     with raises(EntityCreationError):
@@ -56,14 +71,46 @@ def test_save_raises_entity_creation_error_on_creation_error(
 def test_save_raises_persistence_error_on_error(monkeypatch, plugin,
                                                 manifestation_model_json,
                                                 alice_keypair):
+    """If bigchaindb-driver returns an error not caught in
+    pycoalaip-bigchaindb, convert it into a
+    `~coalaip.exceptions.PersistenceError`.
+    """
     from coalaip.exceptions import PersistenceError
 
     def mock_driver_error(*args, **kwargs):
         raise Exception()
-    monkeypatch.setattr(plugin.driver.transactions, 'create',
+    monkeypatch.setattr(plugin.driver.transactions, 'prepare',
                         mock_driver_error)
 
     with raises(PersistenceError):
+        plugin.save(manifestation_model_json, user=alice_keypair)
+
+
+def test_save_raises_entity_creation_error_on_transport_error(
+        monkeypatch, plugin, manifestation_model_json, alice_keypair):
+    from bigchaindb_driver.exceptions import TransportError
+    from coalaip.exceptions import EntityCreationError
+
+    def mock_driver_error(*args, **kwargs):
+        raise TransportError()
+    monkeypatch.setattr(plugin.driver.transactions, 'send',
+                        mock_driver_error)
+
+    with raises(EntityCreationError):
+        plugin.save(manifestation_model_json, user=alice_keypair)
+
+
+def test_save_raises_entity_creation_error_on_connection_error(
+        monkeypatch, plugin, manifestation_model_json, alice_keypair):
+    from bigchaindb_driver.exceptions import ConnectionError
+    from coalaip.exceptions import EntityCreationError
+
+    def mock_driver_error(*args, **kwargs):
+        raise ConnectionError()
+    monkeypatch.setattr(plugin.driver.transactions, 'send',
+                        mock_driver_error)
+
+    with raises(EntityCreationError):
         plugin.save(manifestation_model_json, user=alice_keypair)
 
 
@@ -114,7 +161,7 @@ def test_get_status_raises_persistence_error_on_error(monkeypatch, plugin,
 def test_load_model(plugin, persisted_manifestation):
     tx_id = persisted_manifestation['id']
     loaded_transaction = plugin.load(tx_id)
-    assert loaded_transaction == persisted_manifestation['transaction']['data']['payload']
+    assert loaded_transaction == persisted_manifestation['transaction']['asset']['data']
 
 
 def test_load_model_raises_not_found_error_on_not_found(

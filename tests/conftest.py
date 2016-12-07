@@ -105,10 +105,15 @@ def rights_assignment_model_json():
 @fixture
 def created_manifestation(bdb_driver, manifestation_model_jsonld,
                           alice_keypair):
-    return bdb_driver.transactions.create(
-        manifestation_model_jsonld,
-        verifying_key=alice_keypair['verifying_key'],
-        signing_key=alice_keypair['signing_key'])
+    tx = bdb_driver.transactions.prepare(
+        operation='CREATE',
+        owners_before=alice_keypair['verifying_key'],
+        # TODO: Where to put this "normalization"?
+        asset={'data': manifestation_model_jsonld})
+    fulfilled_tx = bdb_driver.transactions.fulfill(
+        tx, private_keys=alice_keypair['signing_key'])
+    bdb_driver.transactions.send(fulfilled_tx)
+    return fulfilled_tx
 
 
 @fixture
