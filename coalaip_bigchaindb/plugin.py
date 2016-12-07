@@ -1,6 +1,12 @@
 from bigchaindb_driver import BigchainDB
 from bigchaindb_driver.crypto import generate_keypair
-from bigchaindb_driver.exceptions import BigchaindbException, NotFoundError
+from bigchaindb_driver.exceptions import (
+    BigchaindbException,
+    NotFoundError,
+    MissingSigningKeyError,
+    TransportError,
+    ConnectionError,
+)
 from coalaip.exceptions import (
     EntityCreationError,
     EntityNotFoundError,
@@ -109,14 +115,24 @@ class Plugin(AbstractPlugin):
         """
 
         try:
-            tx_json = self.driver.transactions.create(
-                entity_data,
-                verifying_key=user['verifying_key'],
-                signing_key=user['signing_key'])
+            tx = self.driver.transactions.prepare(
+                operation='CREATE',
+                owners_before=user['verifying_key'],
+                # TODO: Where to put this "normalization"?
+                asset={'data': entity_data})
         except BigchaindbException as ex:
             raise EntityCreationError(error=ex)
+        try:
+            fulfilled_tx = self.driver.transactions.fulfill(
+                tx, private_keys=user['signing_key'])
+        except MissingSigningKeyError as ex:
+            raise EntityCreationError(error=ex)
+        try:
+            self.driver.transactions.send(fulfilled_tx)
+        except (TransportError, ConnectionError) as ex:
+            raise EntityCreationError(error=ex)
 
-        return tx_json['id']
+        return fulfilled_tx['id']
 
     @reraise_as_persistence_error_if_not(EntityNotFoundError)
     def load(self, persist_id):
@@ -143,7 +159,7 @@ class Plugin(AbstractPlugin):
         except NotFoundError:
             raise EntityNotFoundError()
 
-        return tx_json['transaction']['data']['payload']
+        return tx_json['transaction']['asset']['data']
 
     @reraise_as_persistence_error_if_not(EntityNotFoundError,
                                          EntityTransferError)
