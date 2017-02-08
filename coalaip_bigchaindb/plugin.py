@@ -3,7 +3,7 @@ from bigchaindb_driver.crypto import generate_keypair
 from bigchaindb_driver.exceptions import (
     BigchaindbException,
     NotFoundError,
-    MissingSigningKeyError,
+    MissingPrivateKeyError,
     TransportError,
     ConnectionError,
 )
@@ -41,16 +41,16 @@ class Plugin(AbstractPlugin):
         return 'BigchainDB'
 
     def generate_user(self):
-        """Create a new verifying/signing keypair for use with
+        """Create a new public/private keypair for use with
         BigchainDB.
 
         Returns:
-            dict: A dict containing a new user's verifying and signing
+            dict: A dict containing a new user's public and private
             keys::
 
                 {
-                    'verifying_key': (str),
-                    'signing_key': (str),
+                    'public_key': (str),
+                    'private_key': (str),
                 }
         """
 
@@ -88,7 +88,7 @@ class Plugin(AbstractPlugin):
     @reraise_as_persistence_error_if_not(EntityCreationError)
     def save(self, entity_data, *, user):
         """Create and assign a new entity with the given data to the
-        given user's verifying key on BigchainDB.
+        given user's public key on BigchainDB.
 
         Args:
             entity_data (dict): A dict holding the entity's data that
@@ -97,12 +97,12 @@ class Plugin(AbstractPlugin):
                 to on BigchainDB. A dict containing::
 
                     {
-                        'verifying_key': (str),
-                        'signing_key': (str),
+                        'public_key': (str),
+                        'private_key': (str),
                     }
 
-                where 'verifying_key' and 'signing_key' are the user's
-                respective verifying and signing keys.
+                where 'public_key' and 'private_key' are the user's
+                respective public and private keys.
 
         Returns:
             str: Id of the creation transaction for the new entity
@@ -117,15 +117,14 @@ class Plugin(AbstractPlugin):
         try:
             tx = self.driver.transactions.prepare(
                 operation='CREATE',
-                owners_before=user['verifying_key'],
-                # TODO: Where to put this "normalization"?
+                signers=user['public_key'],
                 asset={'data': entity_data})
         except BigchaindbException as ex:
             raise EntityCreationError(error=ex)
         try:
             fulfilled_tx = self.driver.transactions.fulfill(
-                tx, private_keys=user['signing_key'])
-        except MissingSigningKeyError as ex:
+                tx, private_keys=user['private_key'])
+        except MissingPrivateKeyError as ex:
             raise EntityCreationError(error=ex)
         try:
             self.driver.transactions.send(fulfilled_tx)
@@ -159,7 +158,7 @@ class Plugin(AbstractPlugin):
         except NotFoundError:
             raise EntityNotFoundError()
 
-        return tx_json['transaction']['asset']['data']
+        return tx_json['asset']['data']
 
     @reraise_as_persistence_error_if_not(EntityNotFoundError,
                                          EntityTransferError)
@@ -174,10 +173,10 @@ class Plugin(AbstractPlugin):
             transfer_payload (dict): A dict holding the transfer's
                 payload
             from_user (dict, keyword): A dict holding the current
-                owner's verifying key and signing key (see
+                owner's public key and private key (see
                 :meth:`generate_user`)
             to_user (dict, keyword): A dict holding the new owner's
-                verifying key and signing key (see
+                public key and private key (see
                 :meth:`generate_user`)
 
         Returns:

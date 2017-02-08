@@ -15,8 +15,8 @@ def test_init_connects_to_driver(plugin):
 
 def test_generate_user(plugin):
     user = plugin.generate_user()
-    assert isinstance(user['verifying_key'], str)
-    assert isinstance(user['signing_key'], str)
+    assert isinstance(user['public_key'], str)
+    assert isinstance(user['private_key'], str)
 
 
 @mark.parametrize('model_name', [
@@ -32,11 +32,11 @@ def test_save_model(plugin, bdb_driver, model_name, alice_keypair, request):
         lambda: bdb_driver.transactions.retrieve(tx_id),
         bdb_transaction_test)
 
-    tx_payload = tx['transaction']['asset']['data']
-    tx_new_owners = tx['transaction']['conditions'][0]['owners_after']
+    tx_payload = tx['asset']['data']
+    tx_new_owners = tx['outputs'][0]['public_keys']
     assert tx['id'] == tx_id
     assert tx_payload == model_data
-    assert tx_new_owners[0] == alice_keypair['verifying_key']
+    assert tx_new_owners[0] == alice_keypair['public_key']
 
 
 def test_save_raises_entity_creation_error_on_creation_error(
@@ -56,11 +56,11 @@ def test_save_raises_entity_creation_error_on_creation_error(
 def test_save_raises_entity_creation_error_on_missing_key(monkeypatch, plugin,
                                                           manifestation_model_json,
                                                           alice_keypair):
-    from bigchaindb_driver.exceptions import MissingSigningKeyError
+    from bigchaindb_driver.exceptions import MissingPrivateKeyError
     from coalaip.exceptions import EntityCreationError
 
     def mock_driver_error(*args, **kwargs):
-        raise MissingSigningKeyError()
+        raise MissingPrivateKeyError()
     monkeypatch.setattr(plugin.driver.transactions, 'fulfill',
                         mock_driver_error)
 
@@ -161,7 +161,7 @@ def test_get_status_raises_persistence_error_on_error(monkeypatch, plugin,
 def test_load_model(plugin, persisted_manifestation):
     tx_id = persisted_manifestation['id']
     loaded_transaction = plugin.load(tx_id)
-    assert loaded_transaction == persisted_manifestation['transaction']['asset']['data']
+    assert loaded_transaction == persisted_manifestation['asset']['data']
 
 
 def test_load_model_raises_not_found_error_on_not_found(
@@ -210,10 +210,10 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
         lambda: bdb_driver.transactions.retrieve(transfer_tx_id),
         bdb_transaction_test)
 
-    transfer_tx_fulfillments = transfer_tx['transaction']['fulfillments']
-    transfer_tx_conditions = transfer_tx['transaction']['conditions']
+    transfer_tx_fulfillments = transfer_tx['inputs']
+    transfer_tx_conditions = transfer_tx['outputs']
     transfer_tx_prev_owners = transfer_tx_fulfillments[0]['owners_before']
-    transfer_tx_new_owners = transfer_tx_conditions[0]['owners_after']
+    transfer_tx_new_owners = transfer_tx_conditions[0]['public_keys']
     assert transfer_tx['id'] == tx_id
-    assert transfer_tx_prev_owners[0] == alice_keypair['verifying_key']
-    assert transfer_tx_new_owners[0] == bob_keypair['verifying_key']
+    assert transfer_tx_prev_owners[0] == alice_keypair['public_key']
+    assert transfer_tx_new_owners[0] == bob_keypair['public_key']

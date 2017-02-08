@@ -2,6 +2,13 @@
 History
 =======
 
+0.0.1.dev4 (TDB)
+----------------
+
+* Upgraded to BigchainDB Server 0.9 (and along with it, bigchaindb-driver@v0.2)
+    * Users are now represented by public/private keypairs instead of
+      verifying/signing keypairs
+
 0.0.1.dev3 (2016-12-07)
 -----------------------
 
