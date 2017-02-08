@@ -24,16 +24,19 @@ class Plugin(AbstractPlugin):
     related actions.
     """
 
-    def __init__(self, *nodes):
+    def __init__(self, *nodes, headers=None):
         """Initialize a :class:`~.Plugin` instance and connect to one or
         more BigchainDB nodes.
 
         Args:
             *nodes (str): One or more URLs of BigchainDB nodes to
                 connect to as the persistence layer
+            headers (dict, optional): Headers to pass with each request
+                from the driver.
+                Defaults to None.
         """
 
-        self.driver = BigchainDB(*nodes)
+        self.driver = BigchainDB(*nodes, headers)
 
     @property
     def type(self):
