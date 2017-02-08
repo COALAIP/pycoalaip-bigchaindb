@@ -4,38 +4,38 @@ from pytest import fixture
 
 
 @fixture
-def alice_signing_key():
+def alice_private_key():
     return 'CT6nWhSyE7dF2znpx3vwXuceSrmeMy9ChBfi9U92HMSP'
 
 
 @fixture
-def alice_verifying_key():
+def alice_public_key():
     return 'G7J7bXF8cqSrjrxUKwcF8tCriEKC5CgyPHmtGwUi4BK3'
 
 
 @fixture
-def alice_keypair(alice_signing_key, alice_verifying_key):
+def alice_keypair(alice_private_key, alice_public_key):
     return {
-        'signing_key': alice_signing_key,
-        'verifying_key': alice_verifying_key
+        'private_key': alice_private_key,
+        'public_key': alice_public_key
     }
 
 
 @fixture
-def bob_signing_key():
+def bob_private_key():
     return '4S1dzx3PSdMAfs59aBkQefPASizTs728HnhLNpYZWCad'
 
 
 @fixture
-def bob_verifying_key():
+def bob_public_key():
     return '2dBVUoATxEzEqRdsi64AFsJnn2ywLCwnbNwW7K9BuVuS'
 
 
 @fixture
-def bob_keypair(bob_signing_key, bob_verifying_key):
+def bob_keypair(bob_private_key, bob_public_key):
     return {
-        'signing_key': bob_signing_key,
-        'verifying_key': bob_verifying_key
+        'private_key': bob_private_key,
+        'public_key': bob_public_key
     }
 
 
@@ -51,7 +51,7 @@ def bdb_port():
 
 @fixture
 def bdb_node(bdb_host, bdb_port):
-    return 'http://{host}:{port}/api/v1'.format(host=bdb_host, port=bdb_port)
+    return 'http://{host}:{port}'.format(host=bdb_host, port=bdb_port)
 
 
 @fixture
@@ -107,11 +107,10 @@ def created_manifestation(bdb_driver, manifestation_model_jsonld,
                           alice_keypair):
     tx = bdb_driver.transactions.prepare(
         operation='CREATE',
-        owners_before=alice_keypair['verifying_key'],
-        # TODO: Where to put this "normalization"?
+        signers=alice_keypair['public_key'],
         asset={'data': manifestation_model_jsonld})
     fulfilled_tx = bdb_driver.transactions.fulfill(
-        tx, private_keys=alice_keypair['signing_key'])
+        tx, private_keys=alice_keypair['private_key'])
     bdb_driver.transactions.send(fulfilled_tx)
     return fulfilled_tx
 
