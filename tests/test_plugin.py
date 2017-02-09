@@ -2,7 +2,6 @@
 
 from pytest import mark, raises
 from tests.utils import (
-    make_transfer_tx,
     poll_bdb_transaction,
     poll_bdb_transaction_valid,
     poll_result,
@@ -26,6 +25,8 @@ def test_generate_user(plugin):
 
 def test_get_history(plugin, bdb_driver, alice_keypair, bob_keypair,
                      persisted_manifestation):
+    from coalaip_bigchaindb.utils import make_transfer_tx
+
     # Transfer to Bob
     transfer_to_bob_tx = make_transfer_tx(bdb_driver,
                                           input_tx=persisted_manifestation,
