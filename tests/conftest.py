@@ -4,39 +4,15 @@ from pytest import fixture
 
 
 @fixture
-def alice_private_key():
-    return 'CT6nWhSyE7dF2znpx3vwXuceSrmeMy9ChBfi9U92HMSP'
+def alice_keypair():
+    from bigchaindb_driver.crypto import generate_keypair
+    return generate_keypair()._asdict()
 
 
 @fixture
-def alice_public_key():
-    return 'G7J7bXF8cqSrjrxUKwcF8tCriEKC5CgyPHmtGwUi4BK3'
-
-
-@fixture
-def alice_keypair(alice_private_key, alice_public_key):
-    return {
-        'private_key': alice_private_key,
-        'public_key': alice_public_key
-    }
-
-
-@fixture
-def bob_private_key():
-    return '4S1dzx3PSdMAfs59aBkQefPASizTs728HnhLNpYZWCad'
-
-
-@fixture
-def bob_public_key():
-    return '2dBVUoATxEzEqRdsi64AFsJnn2ywLCwnbNwW7K9BuVuS'
-
-
-@fixture
-def bob_keypair(bob_private_key, bob_public_key):
-    return {
-        'private_key': bob_private_key,
-        'public_key': bob_public_key
-    }
+def bob_keypair():
+    from bigchaindb_driver.crypto import generate_keypair
+    return generate_keypair()._asdict()
 
 
 @fixture
