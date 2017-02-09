@@ -1,3 +1,4 @@
+from functools import wraps
 from coalaip.exceptions import PersistenceError
 
 
@@ -11,6 +12,7 @@ def reraise_as_persistence_error_if_not(*allowed_exceptions):
             reraise with :exc:`coalaip.PersistenceError`
     """
     def decorator(func):
+        @wraps(func)
         def reraises_if_not(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
