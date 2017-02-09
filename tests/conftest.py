@@ -16,6 +16,12 @@ def bob_keypair():
 
 
 @fixture
+def carly_keypair():
+    from bigchaindb_driver.crypto import generate_keypair
+    return generate_keypair()._asdict()
+
+
+@fixture
 def bdb_host():
     return environ.get('BDB_HOST', 'localhost')
 

@@ -3,6 +3,23 @@ from time import sleep
 from pytest import fail
 
 
+def make_transfer_tx(bdb_driver, *, input_tx, recipients):
+    input_tx_id = input_tx['id'] if input_tx['operation'] == 'CREATE' else input_tx['asset']['id']  # noqa
+    input_tx_output = input_tx['outputs'][0]
+    return bdb_driver.transactions.prepare(
+        operation='TRANSFER',
+        recipients=recipients,
+        asset={'id': input_tx_id},
+        inputs={
+            'fulfillment': input_tx_output['condition']['details'],
+            'fulfills': {
+                'output': 0,
+                'txid': input_tx['id'],
+            },
+            'owners_before': input_tx_output['public_keys']
+        })
+
+
 def poll_bdb_transaction_valid(driver, tx_id):
     return poll_result(
         lambda: driver.transactions.status(tx_id),
