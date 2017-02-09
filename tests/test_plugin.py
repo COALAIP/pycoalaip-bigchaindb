@@ -149,49 +149,47 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
 # Generic NotFoundError tests #
 ###############################
 
-def test_get_status_raises_not_found_error_on_not_found(monkeypatch, plugin,
-                                                        created_manifestation_id):
+@mark.parametrize('func_name,driver_tx_func_name', [
+    ('get_status', 'status'),
+    ('load', 'retrieve')
+])
+def test_generic_plugin_func_on_id_raises_not_found_error_on_not_found(
+        monkeypatch, plugin, created_manifestation_id, func_name,
+        driver_tx_func_name):
     from bigchaindb_driver.exceptions import NotFoundError
     from coalaip.exceptions import EntityNotFoundError
+    plugin_func = getattr(plugin, func_name)
 
     def mock_driver_not_found_error(*args, **kwargs):
         raise NotFoundError()
-    monkeypatch.setattr(plugin.driver.transactions, 'status',
+    monkeypatch.setattr(plugin.driver.transactions, driver_tx_func_name,
                         mock_driver_not_found_error)
 
     with raises(EntityNotFoundError):
-        plugin.get_status(created_manifestation_id)
-
-
-def test_load_model_raises_not_found_error_on_not_found(
-        monkeypatch, plugin, created_manifestation_id):
-    from bigchaindb_driver.exceptions import NotFoundError
-    from coalaip.exceptions import EntityNotFoundError
-
-    def mock_driver_not_found_error(*args, **kwargs):
-        raise NotFoundError()
-    monkeypatch.setattr(plugin.driver.transactions, 'retrieve',
-                        mock_driver_not_found_error)
-
-    with raises(EntityNotFoundError):
-        plugin.load(created_manifestation_id)
+        plugin_func(created_manifestation_id)
 
 
 ##################################
 # Generic PersistenceError tests #
 ##################################
 
-def test_get_status_raises_persistence_error_on_error(monkeypatch, plugin,
-                                                      created_manifestation_id):
+@mark.parametrize('func_name,driver_tx_func_name', [
+    ('get_status', 'status'),
+    ('load', 'retrieve')
+])
+def test_generic_plugin_func_on_id_raises_persistence_error_on_error(
+        monkeypatch, plugin, created_manifestation_id, func_name,
+        driver_tx_func_name):
     from coalaip.exceptions import PersistenceError
+    plugin_func = getattr(plugin, func_name)
 
-    def mock_driver_error(*args, **kwargs):
+    def mock_driver_not_found_error(*args, **kwargs):
         raise Exception()
-    monkeypatch.setattr(plugin.driver.transactions, 'status',
-                        mock_driver_error)
+    monkeypatch.setattr(plugin.driver.transactions, driver_tx_func_name,
+                        mock_driver_not_found_error)
 
     with raises(PersistenceError):
-        plugin.get_status(created_manifestation_id)
+        plugin_func(created_manifestation_id)
 
 
 def test_save_raises_persistence_error_on_error(monkeypatch, plugin,
@@ -210,16 +208,3 @@ def test_save_raises_persistence_error_on_error(monkeypatch, plugin,
 
     with raises(PersistenceError):
         plugin.save(manifestation_model_json, user=alice_keypair)
-
-
-def test_load_model_raises_persistence_error_on_error(monkeypatch, plugin,
-                                                      created_manifestation_id):
-    from coalaip.exceptions import PersistenceError
-
-    def mock_driver_error(*args, **kwargs):
-        raise Exception()
-    monkeypatch.setattr(plugin.driver.transactions, 'retrieve',
-                        mock_driver_error)
-
-    with raises(PersistenceError):
-        plugin.load(created_manifestation_id)
