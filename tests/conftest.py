@@ -92,14 +92,19 @@ def created_manifestation(bdb_driver, manifestation_model_jsonld,
 
 
 @fixture
+def created_manifestation_id(created_manifestation):
+    return created_manifestation['id']
+
+
+@fixture
 def persisted_manifestation(bdb_driver, created_manifestation):
     from tests.utils import bdb_transaction_test, poll_result
-    created_id = created_manifestation['id']
+    tx_id = created_manifestation['id']
 
     # Poll BigchainDB until the created manifestation becomes valid (and
     # 'persisted')
     poll_result(
-        lambda: bdb_driver.transactions.status(created_id),
+        lambda: bdb_driver.transactions.status(tx_id),
         lambda result: bdb_transaction_test)
 
     return created_manifestation
