@@ -58,9 +58,12 @@ def order_transactions(transactions):
         if tx['id'] not in input_dependencies:
             if end_tx:
                 raise ValueError(
-                    ('Two potential ending transactions (with  ids: `{}` and '
-                     '`{}` were found when attempting to order a list of '
-                     'transactions.'.format(end_tx['id'], tx['id'])))
+                    ('More than one transaction (ids include `{}` and `{}`) '
+                     'was found to have no other transactions depend upon it '
+                     'when attempting to order a list of transactions. This '
+                     'means that the given list either contains a transaction '
+                     'chain that is not flat or that some transactions are '
+                     'missing from the list.'.format(end_tx['id'], tx['id'])))
             end_tx = tx
 
     if not end_tx:
@@ -76,21 +79,6 @@ def order_transactions(transactions):
 
         # If we're at the start of the tx chain, there is no next tx to find
         if ii is not 0:
-            fulfilled_by = end_tx['inputs'][0]['fulfills']
-            if not fulfilled_by:
-                raise ValueError(
-                    ('Found transaction with id `{}` that does not fulfill a '
-                     'prior transaction before an attempt to order a list of '
-                     'transactions was complete. There were most likely two '
-                     'CREATE transactions given.'.format(end_tx['id'])))
-            try:
-                end_tx = txs_by_id[fulfilled_by['txid']]
-            except KeyError:
-                raise ValueError(
-                    ('Could not find a transaction with with id `{input_tx}` '
-                     '(that transaction `{tx}` depends upon) when attempting '
-                     'to order a list of transatcions.'.format(
-                         input_tx=end_tx['inputs'][0]['fulfills']['txid'],
-                         tx=end_tx['id'])))
+            end_tx = txs_by_id[end_tx['inputs'][0]['fulfills']['txid']]
 
     return ordered_tx
