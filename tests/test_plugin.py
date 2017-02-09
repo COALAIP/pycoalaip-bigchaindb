@@ -19,12 +19,10 @@ def test_generate_user(plugin):
     assert isinstance(user['private_key'], str)
 
 
-def test_get_status(plugin, created_manifestation):
-    tx_id = created_manifestation['id']
-
+def test_get_status(plugin, created_manifestation_id):
     # Poll BigchainDB for the initial status
     poll_result(
-        lambda: plugin.get_status(tx_id),
+        lambda: plugin.get_status(created_manifestation_id),
         lambda result: result['status'] in (
             'valid', 'invalid', 'undecided', 'backlog'))
 
@@ -32,12 +30,12 @@ def test_get_status(plugin, created_manifestation):
     # transaction's status doesn't become valid by the end of the timeout
     # period.
     poll_result(
-        lambda: plugin.get_status(tx_id),
+        lambda: plugin.get_status(created_manifestation_id),
         lambda result: result['status'] == 'valid')
 
 
 def test_get_status_raises_not_found_error_on_not_found(monkeypatch, plugin,
-                                                        created_manifestation):
+                                                        created_manifestation_id):
     from bigchaindb_driver.exceptions import NotFoundError
     from coalaip.exceptions import EntityNotFoundError
 
@@ -47,11 +45,11 @@ def test_get_status_raises_not_found_error_on_not_found(monkeypatch, plugin,
                         mock_driver_not_found_error)
 
     with raises(EntityNotFoundError):
-        plugin.get_status(created_manifestation['id'])
+        plugin.get_status(created_manifestation_id)
 
 
 def test_get_status_raises_persistence_error_on_error(monkeypatch, plugin,
-                                                      created_manifestation):
+                                                      created_manifestation_id):
     from coalaip.exceptions import PersistenceError
 
     def mock_driver_error(*args, **kwargs):
@@ -60,7 +58,7 @@ def test_get_status_raises_persistence_error_on_error(monkeypatch, plugin,
                         mock_driver_error)
 
     with raises(PersistenceError):
-        plugin.get_status(created_manifestation['id'])
+        plugin.get_status(created_manifestation_id)
 
 
 @mark.parametrize('model_name', [
@@ -165,7 +163,7 @@ def test_load_model(plugin, persisted_manifestation):
 
 
 def test_load_model_raises_not_found_error_on_not_found(
-        monkeypatch, plugin, created_manifestation):
+        monkeypatch, plugin, created_manifestation_id):
     from bigchaindb_driver.exceptions import NotFoundError
     from coalaip.exceptions import EntityNotFoundError
 
@@ -175,11 +173,11 @@ def test_load_model_raises_not_found_error_on_not_found(
                         mock_driver_not_found_error)
 
     with raises(EntityNotFoundError):
-        plugin.load(created_manifestation['id'])
+        plugin.load(created_manifestation_id)
 
 
 def test_load_model_raises_persistence_error_on_error(monkeypatch, plugin,
-                                                      created_manifestation):
+                                                      created_manifestation_id):
     from coalaip.exceptions import PersistenceError
 
     def mock_driver_error(*args, **kwargs):
@@ -188,7 +186,7 @@ def test_load_model_raises_persistence_error_on_error(monkeypatch, plugin,
                         mock_driver_error)
 
     with raises(PersistenceError):
-        plugin.load(created_manifestation['id'])
+        plugin.load(created_manifestation_id)
 
 
 @mark.skip(reason='transfer() not implemented yet')
