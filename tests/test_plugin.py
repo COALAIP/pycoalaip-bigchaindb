@@ -2,7 +2,9 @@
 
 from pytest import mark, raises
 from tests.utils import (
+    make_transfer_tx,
     poll_bdb_transaction,
+    poll_bdb_transaction_valid,
     poll_result,
 )
 
@@ -20,6 +22,45 @@ def test_generate_user(plugin):
     user = plugin.generate_user()
     assert isinstance(user['public_key'], str)
     assert isinstance(user['private_key'], str)
+
+
+def test_get_history(plugin, bdb_driver, alice_keypair, bob_keypair,
+                     persisted_manifestation):
+    # Transfer to Bob
+    transfer_to_bob_tx = make_transfer_tx(bdb_driver,
+                                          input_tx=persisted_manifestation,
+                                          recipients=bob_keypair['public_key'])
+    transfer_to_bob_tx = bdb_driver.transactions.fulfill(
+        transfer_to_bob_tx, private_keys=alice_keypair['private_key'])
+    bdb_driver.transactions.send(transfer_to_bob_tx)
+
+    poll_bdb_transaction_valid(bdb_driver, transfer_to_bob_tx['id'])
+
+    # Transfer back to Alice
+    transfer_back_to_alice_tx = make_transfer_tx(bdb_driver,
+                                                 input_tx=transfer_to_bob_tx,
+                                                 recipients=alice_keypair['public_key'])
+    transfer_back_to_alice_tx = bdb_driver.transactions.fulfill(
+        transfer_back_to_alice_tx, private_keys=bob_keypair['private_key'])
+    bdb_driver.transactions.send(transfer_back_to_alice_tx)
+
+    poll_bdb_transaction_valid(bdb_driver, transfer_back_to_alice_tx['id'])
+
+    # Test that we get all these transactions back
+    # Note that the CREATE transaction's id is the id of the entity
+    try:
+        history = plugin.get_history(persisted_manifestation['id'])
+    except Exception as ex:
+        print(ex)
+        raise
+
+    assert len(history) == 3
+    assert history[0]['user']['public_key'] == alice_keypair['public_key']
+    assert history[0]['event_id'] == persisted_manifestation['id']
+    assert history[1]['user']['public_key'] == bob_keypair['public_key']
+    assert history[1]['event_id'] == transfer_to_bob_tx['id']
+    assert history[2]['user']['public_key'] == alice_keypair['public_key']
+    assert history[2]['event_id'] == transfer_back_to_alice_tx['id']
 
 
 def test_get_status(plugin, created_manifestation_id):
@@ -149,6 +190,7 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
 ###############################
 
 @mark.parametrize('func_name,driver_tx_func_name', [
+    ('get_history', 'get'),
     ('get_status', 'status'),
     ('load', 'retrieve')
 ])
@@ -173,6 +215,7 @@ def test_generic_plugin_func_on_id_raises_not_found_error_on_not_found(
 ##################################
 
 @mark.parametrize('func_name,driver_tx_func_name', [
+    ('get_history', 'get'),
     ('get_status', 'status'),
     ('load', 'retrieve')
 ])

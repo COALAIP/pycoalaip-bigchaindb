@@ -13,7 +13,10 @@ from coalaip.exceptions import (
     EntityTransferError,
 )
 from coalaip.plugin import AbstractPlugin
-from coalaip_bigchaindb.utils import reraise_as_persistence_error_if_not
+from coalaip_bigchaindb.utils import (
+    reraise_as_persistence_error_if_not,
+    order_transactions
+)
 
 
 class Plugin(AbstractPlugin):
@@ -55,6 +58,51 @@ class Plugin(AbstractPlugin):
         """
 
         return generate_keypair()._asdict()
+
+    @reraise_as_persistence_error_if_not(EntityNotFoundError)
+    def get_history(self, persist_id):
+        """Get the transaction history of an COALA IP entity on
+        BigchainDB.
+
+        Args:
+            persist_id (str): Asset id of the entity on the connected
+                BigchainDB instance
+
+        Returns:
+            list of dict: The ownership history of the entity, sorted
+            starting from the beginning of the entity's history
+            (i.e. creation). Each dict is of the form::
+
+                {
+                    'user': A dict holding only the user's public key
+                            (the private key is omitted as None).
+                    'event_id': The transaction id for the ownership event
+                }
+
+        Raises:
+            :exc:`coalaip.EntityNotFoundError`: If no asset whose id
+                matches :attr:`persist_id` could be found in the
+                connected BigchainDB instance
+            :exc:`~.PersistenceError`: If any other unhandled error
+                from the BigchainDB driver occurred.
+        """
+
+        try:
+            transactions = self.driver.transactions.get(asset_id=persist_id)
+        except NotFoundError:
+            raise EntityNotFoundError()
+
+        # Assume that each transaction will only ever have one owner
+        # (and therefore one output as well)
+        history = [{
+            'user': {
+                'public_key': tx['outputs'][0]['public_keys'][0],
+                'private_key': None
+            },
+            'event_id': tx['id'],
+        } for tx in order_transactions(transactions)]
+
+        return history
 
     @reraise_as_persistence_error_if_not(EntityNotFoundError)
     def get_status(self, persist_id):
