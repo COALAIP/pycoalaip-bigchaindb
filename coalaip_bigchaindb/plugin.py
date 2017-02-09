@@ -169,16 +169,16 @@ class Plugin(AbstractPlugin):
                 signers=user['public_key'],
                 asset={'data': entity_data})
         except BigchaindbException as ex:
-            raise EntityCreationError(error=ex)
+            raise EntityCreationError(error=ex) from ex
         try:
             fulfilled_tx = self.driver.transactions.fulfill(
                 tx, private_keys=user['private_key'])
         except MissingPrivateKeyError as ex:
-            raise EntityCreationError(error=ex)
+            raise EntityCreationError(error=ex) from ex
         try:
             self.driver.transactions.send(fulfilled_tx)
         except (TransportError, ConnectionError) as ex:
-            raise EntityCreationError(error=ex)
+            raise EntityCreationError(error=ex) from ex
 
         return fulfilled_tx['id']
 
