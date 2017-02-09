@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
 from pytest import mark, raises
-from tests.utils import bdb_transaction_test, poll_result
+from tests.utils import (
+    poll_bdb_transaction,
+    poll_result,
+)
 
 
 def test_plugin_type_is_bigchaindb(plugin):
@@ -43,9 +46,7 @@ def test_save_model(plugin, bdb_driver, model_name, alice_keypair, request):
     tx_id = plugin.save(model_data, user=alice_keypair)
 
     # Poll BigchainDB for the result
-    tx = poll_result(
-        lambda: bdb_driver.transactions.retrieve(tx_id),
-        bdb_transaction_test)
+    tx = poll_bdb_transaction(bdb_driver, tx_id)
 
     tx_payload = tx['asset']['data']
     tx_new_owners = tx['outputs'][0]['public_keys']
@@ -132,9 +133,7 @@ def test_transfer(plugin, bdb_driver, persisted_manifestation, model_name,
                                      to_user=bob_keypair)
 
     # Poll BigchainDB for the result
-    transfer_tx = poll_result(
-        lambda: bdb_driver.transactions.retrieve(transfer_tx_id),
-        bdb_transaction_test)
+    transfer_tx = poll_bdb_transaction(bdb_driver, transfer_tx_id)
 
     transfer_tx_fulfillments = transfer_tx['inputs']
     transfer_tx_conditions = transfer_tx['outputs']
