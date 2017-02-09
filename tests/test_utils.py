@@ -1,5 +1,21 @@
 from pytest import raises
-from tests.utils import make_transfer_tx
+
+
+def test_make_transfer_transaction(bdb_driver, alice_keypair, bob_keypair,
+                                   created_manifestation):
+    from coalaip_bigchaindb.utils import make_transfer_tx
+    mock_metadata = {'mock': 'mock'}
+    transfer_tx = make_transfer_tx(bdb_driver, input_tx=created_manifestation,
+                                   recipients=bob_keypair['public_key'],
+                                   metadata=mock_metadata)
+    transfer_tx = bdb_driver.transactions.fulfill(
+        transfer_tx, private_keys=alice_keypair['private_key'])
+
+    assert transfer_tx['asset']['id'] == created_manifestation['id']
+    assert transfer_tx['metadata'] == mock_metadata
+    assert transfer_tx['inputs'][0]['fulfills']['txid'] == created_manifestation['id']
+    assert transfer_tx['inputs'][0]['owners_before'][0] == alice_keypair['public_key']
+    assert transfer_tx['outputs'][0]['public_keys'][0] == bob_keypair['public_key']
 
 
 def test_reraise_as_persistence_error():
@@ -33,7 +49,7 @@ def test_reraise_as_persistence_error_raises_allowed():
 
 def test_order_transactions(bdb_driver, alice_keypair, bob_keypair):
     import random
-    from coalaip_bigchaindb.utils import order_transactions
+    from coalaip_bigchaindb.utils import make_transfer_tx, order_transactions
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
@@ -51,7 +67,7 @@ def test_order_transactions(bdb_driver, alice_keypair, bob_keypair):
 def test_order_transactions_is_correct_without_create(
         bdb_driver, alice_keypair, bob_keypair):
     import random
-    from coalaip_bigchaindb.utils import order_transactions
+    from coalaip_bigchaindb.utils import make_transfer_tx, order_transactions
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
@@ -76,7 +92,7 @@ def test_order_empty_transations():
 
 def test_order_transactions_fails_with_multiple_endings(
         bdb_driver, alice_keypair, bob_keypair, carly_keypair):
-    from coalaip_bigchaindb.utils import order_transactions
+    from coalaip_bigchaindb.utils import make_transfer_tx, order_transactions
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
@@ -93,7 +109,7 @@ def test_order_transactions_fails_with_multiple_endings(
 
 def test_order_transactions_fails_with_cyclic_tx(
         bdb_driver, alice_keypair, bob_keypair, carly_keypair):
-    from coalaip_bigchaindb.utils import order_transactions
+    from coalaip_bigchaindb.utils import make_transfer_tx, order_transactions
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
@@ -120,7 +136,7 @@ def test_order_transactions_fails_with_cyclic_tx(
 
 def test_order_transactions_fails_with_multiple_starts(
         bdb_driver, alice_keypair, bob_keypair, carly_keypair):
-    from coalaip_bigchaindb.utils import order_transactions
+    from coalaip_bigchaindb.utils import make_transfer_tx, order_transactions
     create_tx_alice = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
@@ -143,7 +159,7 @@ def test_order_transactions_fails_with_multiple_starts(
 
 def test_order_transactions_fails_with_missing_tx(bdb_driver, alice_keypair,
                                                   bob_keypair, carly_keypair):
-    from coalaip_bigchaindb.utils import order_transactions
+    from coalaip_bigchaindb.utils import make_transfer_tx, order_transactions
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])

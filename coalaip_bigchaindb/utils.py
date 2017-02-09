@@ -2,6 +2,29 @@ from functools import wraps
 from coalaip.exceptions import PersistenceError
 
 
+def make_transfer_tx(bdb_driver, *, input_tx, recipients, metadata=None):
+    if input_tx['operation'] == 'CREATE':
+        input_asset_id = input_tx['id']
+    else:
+        input_asset_id = input_tx['asset']['id']
+
+    input_tx_output = input_tx['outputs'][0]
+
+    return bdb_driver.transactions.prepare(
+        operation='TRANSFER',
+        recipients=recipients,
+        asset={'id': input_asset_id},
+        metadata=metadata,
+        inputs={
+            'fulfillment': input_tx_output['condition']['details'],
+            'fulfills': {
+                'output': 0,
+                'txid': input_tx['id'],
+            },
+            'owners_before': input_tx_output['public_keys']
+        })
+
+
 def reraise_as_persistence_error_if_not(*allowed_exceptions):
     """Decorator: Reraises any exception from the wrapped function
     by wrapping it around a :exc:`coalaip.PersistenceError` unless it's
