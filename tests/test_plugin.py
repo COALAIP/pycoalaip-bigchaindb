@@ -97,63 +97,6 @@ def test_save_model(plugin, bdb_driver, model_name, alice_keypair, request):
     assert tx_recipients[0] == alice_keypair['public_key']
 
 
-def test_save_raises_entity_creation_error_on_creation_error(
-        monkeypatch, plugin, manifestation_model_json, alice_keypair):
-    from bigchaindb_driver.exceptions import BigchaindbException
-    from coalaip.exceptions import EntityCreationError
-
-    def mock_driver_error(*args, **kwargs):
-        raise BigchaindbException()
-    monkeypatch.setattr(plugin.driver.transactions, 'prepare',
-                        mock_driver_error)
-
-    with raises(EntityCreationError):
-        plugin.save(manifestation_model_json, user=alice_keypair)
-
-
-def test_save_raises_entity_creation_error_on_missing_key(monkeypatch, plugin,
-                                                          manifestation_model_json,
-                                                          alice_keypair):
-    from bigchaindb_driver.exceptions import MissingPrivateKeyError
-    from coalaip.exceptions import EntityCreationError
-
-    def mock_driver_error(*args, **kwargs):
-        raise MissingPrivateKeyError()
-    monkeypatch.setattr(plugin.driver.transactions, 'fulfill',
-                        mock_driver_error)
-
-    with raises(EntityCreationError):
-        plugin.save(manifestation_model_json, user=alice_keypair)
-
-
-def test_save_raises_entity_creation_error_on_transport_error(
-        monkeypatch, plugin, manifestation_model_json, alice_keypair):
-    from bigchaindb_driver.exceptions import TransportError
-    from coalaip.exceptions import EntityCreationError
-
-    def mock_driver_error(*args, **kwargs):
-        raise TransportError()
-    monkeypatch.setattr(plugin.driver.transactions, 'send',
-                        mock_driver_error)
-
-    with raises(EntityCreationError):
-        plugin.save(manifestation_model_json, user=alice_keypair)
-
-
-def test_save_raises_entity_creation_error_on_connection_error(
-        monkeypatch, plugin, manifestation_model_json, alice_keypair):
-    from bigchaindb_driver.exceptions import ConnectionError
-    from coalaip.exceptions import EntityCreationError
-
-    def mock_driver_error(*args, **kwargs):
-        raise ConnectionError()
-    monkeypatch.setattr(plugin.driver.transactions, 'send',
-                        mock_driver_error)
-
-    with raises(EntityCreationError):
-        plugin.save(manifestation_model_json, user=alice_keypair)
-
-
 def test_load_model(plugin, persisted_manifestation):
     tx_id = persisted_manifestation['id']
     loaded_transaction = plugin.load(tx_id)
@@ -244,21 +187,95 @@ def test_transfer_can_be_retransferred(plugin, bdb_driver,
     assert second_transfer_tx_recipients[0] == carly_keypair['public_key']
 
 
+###########################
+# Transaction error tests #
+###########################
 
-def test_transfer_raises_transfer_error_on_transfer_error(
-        monkeypatch, plugin, alice_keypair, bob_keypair,
-        persisted_manifestation):
-    from bigchaindb_driver.exceptions import BigchaindbException
-    from coalaip.exceptions import EntityTransferError
-    tx_id = persisted_manifestation['id']
+@mark.parametrize('error_type_name,driver_func_name', [
+    ('BigchaindbException', 'prepare'),
+    ('MissingPrivateKeyError', 'fulfill'),
+])
+def test_save_raises_entity_creation_error_on_make_tx_error(
+        monkeypatch, plugin, manifestation_model_json, alice_keypair,
+        error_type_name, driver_func_name):
+    from coalaip.exceptions import EntityCreationError
 
     def mock_driver_error(*args, **kwargs):
-        raise BigchaindbException()
-    monkeypatch.setattr(plugin.driver.transactions, 'transfer',
+        import importlib
+        bdb_exceptions = importlib.import_module('bigchaindb_driver.exceptions')
+        ExceptionType = getattr(bdb_exceptions, error_type_name)
+        raise ExceptionType()
+    monkeypatch.setattr(plugin.driver.transactions, driver_func_name,
+                        mock_driver_error)
+
+    with raises(EntityCreationError):
+        plugin.save(manifestation_model_json, user=alice_keypair)
+
+
+@mark.parametrize('error_type_name,driver_func_name', [
+    ('BigchaindbException', 'prepare'),
+    ('MissingPrivateKeyError', 'fulfill'),
+])
+def test_transfer_raises_entity_transfer_error_on_make_tx_error(
+        monkeypatch, plugin, alice_keypair, bob_keypair,
+        persisted_manifestation, error_type_name, driver_func_name):
+    from coalaip.exceptions import EntityTransferError
+    entity_id = persisted_manifestation['id']
+
+    def mock_driver_error(*args, **kwargs):
+        import importlib
+        bdb_exceptions = importlib.import_module('bigchaindb_driver.exceptions')
+        ExceptionType = getattr(bdb_exceptions, error_type_name)
+        raise ExceptionType()
+
+    monkeypatch.setattr(plugin.driver.transactions, driver_func_name,
                         mock_driver_error)
 
     with raises(EntityTransferError):
-        plugin.transfer(tx_id, from_user=alice_keypair, to_user=bob_keypair)
+        plugin.transfer(entity_id, from_user=alice_keypair, to_user=bob_keypair)
+
+
+#######################
+# Network error tests #
+#######################
+
+@mark.parametrize('error_type_name', ['TransportError', 'ConnectionError'])
+def test_save_raises_entity_creation_error_on_network_error(
+        monkeypatch, plugin, manifestation_model_json, alice_keypair,
+        error_type_name):
+    from coalaip.exceptions import EntityCreationError
+
+    def mock_driver_error(*args, **kwargs):
+        import importlib
+        bdb_exceptions = importlib.import_module('bigchaindb_driver.exceptions')
+        ExceptionType = getattr(bdb_exceptions, error_type_name)
+        raise ExceptionType()
+
+    monkeypatch.setattr(plugin.driver.transactions, 'send',
+                        mock_driver_error)
+
+    with raises(EntityCreationError):
+        plugin.save(manifestation_model_json, user=alice_keypair)
+
+
+@mark.parametrize('error_type_name', ['TransportError', 'ConnectionError'])
+def test_transfer_raises_entity_transfer_error_on_network_error(
+        monkeypatch, plugin, alice_keypair, bob_keypair,
+        persisted_manifestation, error_type_name):
+    from coalaip.exceptions import EntityTransferError
+    entity_id = persisted_manifestation['id']
+
+    def mock_driver_error(*args, **kwargs):
+        import importlib
+        bdb_exceptions = importlib.import_module('bigchaindb_driver.exceptions')
+        ExceptionType = getattr(bdb_exceptions, error_type_name)
+        raise ExceptionType()
+
+    monkeypatch.setattr(plugin.driver.transactions, 'send',
+                        mock_driver_error)
+
+    with raises(EntityTransferError):
+        plugin.transfer(entity_id, from_user=alice_keypair, to_user=bob_keypair)
 
 
 ###############################
