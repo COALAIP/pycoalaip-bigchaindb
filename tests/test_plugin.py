@@ -103,31 +103,6 @@ def test_load_model(plugin, persisted_manifestation):
     assert loaded_transaction == persisted_manifestation['asset']['data']
 
 
-def test_load_model_raises_not_found_error_on_not_found(
-        monkeypatch, plugin, created_manifestation):
-    from bigchaindb_driver.exceptions import NotFoundError
-    from coalaip.exceptions import EntityNotFoundError
-
-    def mock_driver_not_found_error(*args, **kwargs):
-        raise NotFoundError()
-    monkeypatch.setattr(plugin.driver.transactions, 'retrieve',
-                        mock_driver_not_found_error)
-
-    with raises(EntityNotFoundError):
-        plugin.load(created_manifestation['id'])
-
-
-def test_load_model_raises_persistence_error_on_error(monkeypatch, plugin,
-                                                      created_manifestation):
-    from coalaip.exceptions import PersistenceError
-
-    def mock_driver_error(*args, **kwargs):
-        raise Exception()
-    monkeypatch.setattr(plugin.driver.transactions, 'retrieve',
-                        mock_driver_error)
-
-    with raises(PersistenceError):
-        plugin.load(created_manifestation['id'])
 
 
 @mark.parametrize('model_name', [
@@ -305,10 +280,10 @@ def test_generic_plugin_func_on_id_raises_not_found_error_on_not_found(
 
 def test_transfer_raises_not_found_error_on_not_found(
         monkeypatch, plugin, alice_keypair, bob_keypair,
-        created_manifestation):
+        created_manifestation_id):
     from bigchaindb_driver.exceptions import NotFoundError
     from coalaip.exceptions import EntityNotFoundError
-    tx_id = created_manifestation['id']
+    tx_id = created_manifestation_id
 
     def mock_driver_not_found_error(*args, **kwargs):
         raise NotFoundError()
