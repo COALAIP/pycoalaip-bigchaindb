@@ -103,6 +103,11 @@ def test_load_model(plugin, persisted_manifestation):
     assert loaded_transaction == persisted_manifestation['asset']['data']
 
 
+def test_load_transfer_rights_assignment_model(
+        plugin, transferred_manifestation_tx):
+    tx_id = transferred_manifestation_tx['id']
+    loaded_rights_assignment = plugin.load(tx_id)
+    assert loaded_rights_assignment == transferred_manifestation_tx['metadata']
 
 
 @mark.parametrize('model_name', [

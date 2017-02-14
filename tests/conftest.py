@@ -112,3 +112,37 @@ def persisted_manifestation(bdb_driver, created_manifestation):
     poll_bdb_transaction_valid(bdb_driver, tx_id)
 
     return created_manifestation
+
+
+@fixture
+def transferred_manifestation_tx(bdb_driver, persisted_manifestation,
+                                 alice_keypair, bob_keypair,
+                                 rights_assignment_model_json):
+    from tests.utils import poll_bdb_transaction_valid
+    input_tx = persisted_manifestation
+    asset_id = input_tx['id']
+    input_tx_output = input_tx['outputs'][0]
+
+    transfer_tx = bdb_driver.transactions.prepare(
+        operation='TRANSFER',
+        recipients=bob_keypair['public_key'],
+        asset={'id': asset_id},
+        metadata=rights_assignment_model_json,
+        inputs={
+            'fulfillment': input_tx_output['condition']['details'],
+            'fulfills': {
+                'output': 0,
+                'txid': input_tx['id'],
+            },
+            'owners_before': input_tx_output['public_keys'],
+        },
+    )
+
+    fulfilled_transfer_tx = bdb_driver.transactions.fulfill(
+        transfer_tx, private_keys=alice_keypair['private_key'])
+    bdb_driver.transactions.send(fulfilled_transfer_tx)
+
+    # Poll BigchainDB until the transfer becomes valid (and 'persisted')
+    poll_bdb_transaction_valid(bdb_driver, fulfilled_transfer_tx['id'])
+
+    return fulfilled_transfer_tx
