@@ -60,6 +60,13 @@ class Plugin(AbstractPlugin):
 
         return generate_keypair()._asdict()
 
+    def is_same_user(self, user_a, user_b):
+        """Check if :attr:`user_a` represents the same user as
+        :attr:`user_b` on BigchainDB by comparing their public keys.
+        """
+
+        return user_a['public_key'] == user_b['public_key']
+
     @reraise_as_persistence_error_if_not(EntityNotFoundError)
     def get_history(self, persist_id):
         """Get the transaction history of an COALA IP entity on
