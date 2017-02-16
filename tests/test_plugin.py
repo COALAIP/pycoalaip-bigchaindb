@@ -23,6 +23,22 @@ def test_generate_user(plugin):
     assert isinstance(user['private_key'], str)
 
 
+def test_is_same_user_on_same_user(plugin, alice_keypair):
+    alice_pub_key_only = {
+        'public_key': alice_keypair['public_key']
+    }
+    assert plugin.is_same_user(alice_keypair, alice_keypair)
+    assert plugin.is_same_user(alice_keypair, alice_pub_key_only)
+
+
+def test_is_same_user_on_different_users(plugin, alice_keypair, bob_keypair):
+    bob_pub_key_only = {
+        'public_key': bob_keypair['public_key']
+    }
+    assert not plugin.is_same_user(alice_keypair, bob_keypair)
+    assert not plugin.is_same_user(alice_keypair, bob_pub_key_only)
+
+
 def test_get_history(plugin, bdb_driver, alice_keypair, bob_keypair,
                      persisted_manifestation):
     from coalaip_bigchaindb.utils import make_transfer_tx
