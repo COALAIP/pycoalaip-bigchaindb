@@ -47,10 +47,7 @@ test-cov: ## run tests with coverage
 test-all: ## run tests on every Python version with tox
 	tox
 
-docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/coalaip-bigchaindb.rst
-	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ coalaip_bigchaindb
+docs: ## generate Sphinx HTML documentation
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 
