@@ -2,12 +2,17 @@
 History
 =======
 
-0.0.1.dev4 (TDB)
-----------------
+0.0.1 (2016-02-17)
+------------------
+
+First alpha release on PyPI.
 
 * Upgraded to BigchainDB Server 0.9 (and along with it, bigchaindb-driver@v0.2)
     * Users are now represented by public/private keypairs instead of
       verifying/signing keypairs
+* Added support for querying ownership history of an entity
+* Added support for entity transfers (and retransfers)
+* Added ``is_same_user()``
 
 0.0.1.dev3 (2016-12-07)
 -----------------------

@@ -61,7 +61,7 @@ setup(
     zip_safe=False,
     keywords=['coalaip', 'coalaip plugin', 'bigchaindb'],
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
