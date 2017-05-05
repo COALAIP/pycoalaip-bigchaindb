@@ -21,7 +21,7 @@ tests_require = [
     'pytest>=3.0.1',
     'pytest-cov',
     'pytest-mock',
-    'bigchaindb~=0.9.0',
+    'bigchaindb~=0.10.1',
 ]
 
 dev_require = [
@@ -38,7 +38,7 @@ docs_require = [
 
 setup(
     name='coalaip-bigchaindb',
-    version='0.0.1',
+    version='0.0.2',
     description="BigchainDB ledger plugin for COALA IP's Python reference implementation",
     long_description=readme + '\n\n' + history,
     author="BigchainDB",
