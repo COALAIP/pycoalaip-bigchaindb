@@ -2,6 +2,14 @@
 History
 =======
 
+0.0.2 (2017-05-05)
+------------------
+
+Some changes during the OMI hackfest!
+
+* Upgrade bigchaindb and driver's version to match up
+
+
 0.0.1 (2017-02-17)
 ------------------
 
