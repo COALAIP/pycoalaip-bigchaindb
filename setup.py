@@ -10,7 +10,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'coalaip==0.0.2',
+    'coalaip==0.0.3',
     'bigchaindb_driver~=0.2.2',
 ]
 
