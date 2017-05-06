@@ -10,7 +10,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 install_requires = [
-    'coalaip==0.0.2',
+    'coalaip==0.0.3',
     'bigchaindb_driver~=0.2.2',
 ]
 
@@ -38,7 +38,7 @@ docs_require = [
 
 setup(
     name='coalaip-bigchaindb',
-    version='0.0.3',
+    version='0.0.4',
     description="BigchainDB ledger plugin for COALA IP's Python reference implementation",
     long_description=readme + '\n\n' + history,
     author="BigchainDB",

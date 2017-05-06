@@ -5,6 +5,12 @@ History
 0.0.3 (2017-05-05)
 ------------------
 
+Update version of pycoalaip
+
+
+0.0.4 (2017-05-05)
+------------------
+
 Ups, I forgot something
 
 
