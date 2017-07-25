@@ -2,16 +2,22 @@
 History
 =======
 
-0.0.3 (2017-05-05)
+0.0.5 (2017-07-25)
 ------------------
 
-Update version of pycoalaip
+* Update to comply with BigchainDB 1.0.1 and bigchaindb-driver 0.4.0
 
 
 0.0.4 (2017-05-05)
 ------------------
 
 Ups, I forgot something
+
+
+0.0.3 (2017-05-05)
+------------------
+
+Update version of pycoalaip
 
 
 0.0.2 (2017-05-05)
