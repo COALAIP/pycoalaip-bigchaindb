@@ -13,7 +13,7 @@ def test_make_transfer_transaction(bdb_driver, alice_keypair, bob_keypair,
 
     assert transfer_tx['asset']['id'] == created_manifestation['id']
     assert transfer_tx['metadata'] == mock_metadata
-    assert transfer_tx['inputs'][0]['fulfills']['txid'] == created_manifestation['id']
+    assert transfer_tx['inputs'][0]['fulfills']['transaction_id'] == created_manifestation['id']
     assert transfer_tx['inputs'][0]['owners_before'][0] == alice_keypair['public_key']
     assert transfer_tx['outputs'][0]['public_keys'][0] == bob_keypair['public_key']
 
@@ -124,7 +124,7 @@ def test_order_transactions_fails_with_cyclic_tx(
     # This should create a
     #   bob_transfer <- carly_transfer <- alice_transfer <- bob_transfer
     # dependency cycle.
-    transfer_to_bob_tx['inputs'][0]['fulfills']['txid'] = transfer_to_alice_tx['id']
+    transfer_to_bob_tx['inputs'][0]['fulfills']['transaction_id'] = transfer_to_alice_tx['id']
 
     with raises(ValueError):
         order_transactions([
