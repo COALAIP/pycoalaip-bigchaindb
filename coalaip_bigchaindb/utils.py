@@ -18,8 +18,8 @@ def make_transfer_tx(bdb_driver, *, input_tx, recipients, metadata=None):
         inputs={
             'fulfillment': input_tx_output['condition']['details'],
             'fulfills': {
-                'output': 0,
-                'txid': input_tx['id'],
+                'output_index': 0,
+                'transaction_id': input_tx['id'],
             },
             'owners_before': input_tx_output['public_keys']
         })
@@ -76,7 +76,7 @@ def order_transactions(transactions):
     #   Go through the transactions and find the transaction whose id is not
     #   listed as a dependency of any other transaction
     end_tx = None
-    input_dependencies = {tx['inputs'][0]['fulfills']['txid']
+    input_dependencies = {tx['inputs'][0]['fulfills']['transaction_id']
                           for tx in transactions
                           if tx['inputs'][0]['fulfills']}
     for tx in transactions:
@@ -104,6 +104,6 @@ def order_transactions(transactions):
 
         # If we're at the start of the tx chain, there is no next tx to find
         if ii is not 0:
-            end_tx = txs_by_id[end_tx['inputs'][0]['fulfills']['txid']]
+            end_tx = txs_by_id[end_tx['inputs'][0]['fulfills']['transaction_id']]
 
     return ordered_tx

@@ -131,8 +131,8 @@ def transferred_manifestation_tx(bdb_driver, persisted_manifestation,
         inputs={
             'fulfillment': input_tx_output['condition']['details'],
             'fulfills': {
-                'output': 0,
-                'txid': input_tx['id'],
+                'output_index': 0,
+                'transaction_id': input_tx['id'],
             },
             'owners_before': input_tx_output['public_keys'],
         },

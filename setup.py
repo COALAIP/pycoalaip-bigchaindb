@@ -11,7 +11,7 @@ with open('HISTORY.rst') as history_file:
 
 install_requires = [
     'coalaip==0.0.3',
-    'bigchaindb_driver~=0.2.2',
+    'bigchaindb_driver~=0.4.0',
 ]
 
 tests_require = [
@@ -21,7 +21,7 @@ tests_require = [
     'pytest>=3.0.1',
     'pytest-cov',
     'pytest-mock',
-    'bigchaindb~=0.10.1',
+    'bigchaindb~=1.0.1',
 ]
 
 dev_require = [
@@ -41,7 +41,7 @@ setup(
     version='0.0.4',
     description="BigchainDB ledger plugin for COALA IP's Python reference implementation",
     long_description=readme + '\n\n' + history,
-    author="BigchainDB",
+    author='BigchainDB',
     author_email='dev@bigchaindb.com',
     url='https://github.com/bigchaindb/pycoalaip-bigchaindb',
     packages=find_packages(exclude=['tests*']),
@@ -57,7 +57,7 @@ setup(
         'docs': docs_require,
     },
     test_suite='tests',
-    license="Apache Software License 2.0",
+    license='Apache Software License 2.0',
     zip_safe=False,
     keywords=['coalaip', 'coalaip plugin', 'bigchaindb'],
     classifiers=[
