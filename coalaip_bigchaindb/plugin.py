@@ -1,4 +1,5 @@
 from bigchaindb_driver import BigchainDB
+from bigchaindb_driver.transport import Transport
 from bigchaindb_driver.crypto import generate_keypair
 from bigchaindb_driver.exceptions import (
     BigchaindbException,
@@ -28,25 +29,40 @@ class Plugin(AbstractPlugin):
     related actions.
     """
 
-    def __init__(self, *nodes):
+    def __init__(self, *nodes, transport_class=Transport, headers=None, timeout=20):
         """Initialize a :class:`~.Plugin` instance and connect to one or
         more BigchainDB nodes.
 
         Args:
-            *nodes (str): One or more URLs of BigchainDB nodes to
-                connect to as the persistence layer
+            *nodes (list of (str or dict)): BigchainDB nodes to connect to.
+                Currently, the full URL must be given. In the absence of any
+                node, the default(``'http://localhost:9984'``) will be used.
+                If node is passed as a dict, `endpoint` is a required key;
+                `headers` is an optional `dict` of headers.
+            transport_class: Optional transport class to use.
+                Defaults to :class:`~bigchaindb_driver.transport.Transport`.
+            headers (dict): Optional headers that will be passed with
+                each request. To pass headers only on a per-request
+                basis, you can pass the headers to the method of choice
+                (e.g. :meth:`BigchainDB().transactions.send_commit()
+                <.TransactionsEndpoint.send_commit>`).
+            timeout (int): Optional timeout in seconds that will be passed
+                to each request.
         """
-
-        self.driver = BigchainDB(*nodes)
+        self.driver = BigchainDB(*nodes, transport_class=transport_class, headers=headers, timeout=timeout)
 
     @property
     def type(self):
         """str: the type of this plugin (``'BigchainDB'``)"""
         return 'BigchainDB'
 
-    def generate_user(self):
+    def generate_user(self, seed=None):
         """Create a new public/private keypair for use with
         BigchainDB.
+
+        Args:
+        seed (bytes): 32-byte seed for deterministic generation.
+                      Defaults to `None`.
 
         Returns:
             dict: A dict containing a new user's public and private
@@ -58,7 +74,7 @@ class Plugin(AbstractPlugin):
                 }
         """
 
-        return generate_keypair()._asdict()
+        return generate_keypair(seed)._asdict()
 
     def is_same_user(self, user_a, user_b):
         """Check if :attr:`user_a` represents the same user as
@@ -124,21 +140,19 @@ class Plugin(AbstractPlugin):
             str: the status of the entity; one of::
 
                 'valid': the transaction has been written in a validated block
-                'invalid': the block the transaction was in was voted invalid
-                'undecided': the block the transaction is in is still undecided
-                'backlog': the transaction is still in the backlog
 
         Raises:
             :exc:`coalaip.EntityNotFoundError`: If no transaction whose
                 'uuid' matches :attr:`persist_id` could be found in the
-                connected BigchainDB instance
+                connected BigchainDB instance. This could be because the
+                transaction is still processing.
             :exc:`~.PersistenceError`: If any other unhandled error
                 from the BigchainDB driver occurred.
         """
 
-        try:
-            return self.driver.transactions.status(persist_id)
-        except NotFoundError:
+        if self.driver.blocks.get(txid=persist_id):
+            return 'valid'
+        else:
             raise EntityNotFoundError()
 
     @reraise_as_persistence_error_if_not(EntityCreationError)
@@ -183,7 +197,7 @@ class Plugin(AbstractPlugin):
         except MissingPrivateKeyError as ex:
             raise EntityCreationError(error=ex) from ex
         try:
-            self.driver.transactions.send(fulfilled_tx)
+            self.driver.transactions.send_commit(fulfilled_tx)
         except (TransportError, ConnectionError) as ex:
             raise EntityCreationError(error=ex) from ex
 
@@ -274,7 +288,7 @@ class Plugin(AbstractPlugin):
             raise EntityTransferError(error=ex) from ex
 
         try:
-            transfer_json = self.driver.transactions.send(fulfilled_tx)
+            transfer_json = self.driver.transactions.send_commit(fulfilled_tx)
         except (TransportError, ConnectionError) as ex:
             raise EntityTransferError(error=ex) from ex
 
