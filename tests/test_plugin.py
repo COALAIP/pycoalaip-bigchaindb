@@ -49,7 +49,7 @@ def test_get_history(plugin, bdb_driver, alice_keypair, bob_keypair,
                                           recipients=bob_keypair['public_key'])
     transfer_to_bob_tx = bdb_driver.transactions.fulfill(
         transfer_to_bob_tx, private_keys=alice_keypair['private_key'])
-    bdb_driver.transactions.send(transfer_to_bob_tx)
+    bdb_driver.transactions.send_commit(transfer_to_bob_tx)
 
     poll_bdb_transaction_valid(bdb_driver, transfer_to_bob_tx['id'])
 
@@ -59,7 +59,7 @@ def test_get_history(plugin, bdb_driver, alice_keypair, bob_keypair,
                                                  recipients=alice_keypair['public_key'])
     transfer_back_to_alice_tx = bdb_driver.transactions.fulfill(
         transfer_back_to_alice_tx, private_keys=bob_keypair['private_key'])
-    bdb_driver.transactions.send(transfer_back_to_alice_tx)
+    bdb_driver.transactions.send_commit(transfer_back_to_alice_tx)
 
     poll_bdb_transaction_valid(bdb_driver, transfer_back_to_alice_tx['id'])
 
@@ -81,18 +81,12 @@ def test_get_history(plugin, bdb_driver, alice_keypair, bob_keypair,
 
 
 def test_get_status(plugin, created_manifestation_id):
-    # Poll BigchainDB for the initial status
-    poll_result(
-        lambda: plugin.get_status(created_manifestation_id),
-        lambda result: result['status'] in (
-            'valid', 'invalid', 'undecided', 'backlog'))
-
     # Poll BigchainDB until the transaction validates; will fail test if the
     # transaction's status doesn't become valid by the end of the timeout
     # period.
     poll_result(
         lambda: plugin.get_status(created_manifestation_id),
-        lambda result: result['status'] == 'valid')
+        lambda result: result == 'valid' )
 
 
 @mark.parametrize('model_name', [
@@ -247,7 +241,7 @@ def test_save_raises_entity_creation_error_on_network_error(
         ExceptionType = getattr(bdb_exceptions, error_type_name)
         raise ExceptionType()
 
-    monkeypatch.setattr(plugin.driver.transactions, 'send',
+    monkeypatch.setattr(plugin.driver.transactions, 'send_commit',
                         mock_driver_error)
 
     with raises(EntityCreationError):
@@ -267,7 +261,7 @@ def test_transfer_raises_entity_transfer_error_on_network_error(
         ExceptionType = getattr(bdb_exceptions, error_type_name)
         raise ExceptionType()
 
-    monkeypatch.setattr(plugin.driver.transactions, 'send',
+    monkeypatch.setattr(plugin.driver.transactions, 'send_commit',
                         mock_driver_error)
 
     with raises(EntityTransferError):
@@ -280,7 +274,6 @@ def test_transfer_raises_entity_transfer_error_on_network_error(
 
 @mark.parametrize('func_name,driver_tx_func_name', [
     ('get_history', 'get'),
-    ('get_status', 'status'),
     ('load', 'retrieve')
 ])
 def test_generic_plugin_func_on_id_raises_not_found_error_on_not_found(
@@ -321,7 +314,6 @@ def test_transfer_raises_not_found_error_on_not_found(
 
 @mark.parametrize('func_name,driver_tx_func_name', [
     ('get_history', 'get'),
-    ('get_status', 'status'),
     ('load', 'retrieve')
 ])
 def test_generic_plugin_func_on_id_raises_persistence_error_on_error(
@@ -357,7 +349,7 @@ def test_save_raises_persistence_error_on_error(monkeypatch, plugin,
         plugin.save(manifestation_model_json, user=alice_keypair)
 
 
-@mark.parametrize('driver_method_erroring', ['get', 'send'])
+@mark.parametrize('driver_method_erroring', ['get', 'send_commit'])
 def test_transfer_raises_persistence_error_on_error(
         monkeypatch, plugin, alice_keypair, bob_keypair,
         persisted_manifestation, driver_method_erroring):

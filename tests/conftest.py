@@ -93,7 +93,7 @@ def created_manifestation(bdb_driver, manifestation_model_jsonld,
         asset={'data': manifestation_model_jsonld})
     fulfilled_tx = bdb_driver.transactions.fulfill(
         tx, private_keys=alice_keypair['private_key'])
-    bdb_driver.transactions.send(fulfilled_tx)
+    bdb_driver.transactions.send_commit(fulfilled_tx)
     return fulfilled_tx
 
 
@@ -140,7 +140,7 @@ def transferred_manifestation_tx(bdb_driver, persisted_manifestation,
 
     fulfilled_transfer_tx = bdb_driver.transactions.fulfill(
         transfer_tx, private_keys=alice_keypair['private_key'])
-    bdb_driver.transactions.send(fulfilled_transfer_tx)
+    bdb_driver.transactions.send_commit(fulfilled_transfer_tx)
 
     # Poll BigchainDB until the transfer becomes valid (and 'persisted')
     poll_bdb_transaction_valid(bdb_driver, fulfilled_transfer_tx['id'])

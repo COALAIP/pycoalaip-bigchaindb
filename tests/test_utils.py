@@ -53,7 +53,7 @@ def test_order_transactions(bdb_driver, alice_keypair, bob_keypair):
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
-    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=create_tx,
+    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=fulfill_tx,
                                           recipients=bob_keypair['public_key'])
     transfer_back_to_alice_tx = make_transfer_tx(
         bdb_driver, input_tx=transfer_to_bob_tx, recipients=alice_keypair['public_key'])
@@ -71,7 +71,7 @@ def test_order_transactions_is_correct_without_create(
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
-    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=create_tx,
+    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=fulfill_tx,
                                           recipients=bob_keypair['public_key'])
     transfer_back_to_alice_tx = make_transfer_tx(
         bdb_driver, input_tx=transfer_to_bob_tx, recipients=alice_keypair['public_key'])
@@ -96,10 +96,11 @@ def test_order_transactions_fails_with_multiple_endings(
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
-    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=create_tx,
+    fulfill_tx = bdb_driver.transactions.fulfill(create_tx, alice_keypair['private_key'])
+    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=fulfill_tx,
                                           recipients=bob_keypair['public_key'])
     transfer_to_carly_tx = make_transfer_tx(
-        bdb_driver, input_tx=create_tx, recipients=carly_keypair['public_key'])
+        bdb_driver, input_tx=fulfill_tx, recipients=carly_keypair['public_key'])
 
     with raises(ValueError):
         # Transfer to both bob and carly should result in a multiple endings
@@ -113,7 +114,8 @@ def test_order_transactions_fails_with_cyclic_tx(
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
-    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=create_tx,
+    fulfill_tx = bdb_driver.transactions.fulfill(create_tx, alice_keypair['private_key'])
+    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=fulfill_tx,
                                           recipients=bob_keypair['public_key'])
     transfer_to_carly_tx = make_transfer_tx(
         bdb_driver, input_tx=transfer_to_bob_tx, recipients=carly_keypair['public_key'])
@@ -143,8 +145,9 @@ def test_order_transactions_fails_with_multiple_starts(
     create_tx_bob = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=bob_keypair['public_key'])
+    fulfill_tx_alice = bdb_driver.transactions.fulfill(create_tx_alice, alice_keypair['private_key'])
     transfer_to_carly_tx = make_transfer_tx(
-        bdb_driver, input_tx=create_tx_alice,
+        bdb_driver, input_tx=fulfill_tx_alice,
         recipients=carly_keypair['public_key'])
 
     with raises(ValueError):
@@ -163,7 +166,8 @@ def test_order_transactions_fails_with_missing_tx(bdb_driver, alice_keypair,
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
-    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=create_tx,
+    fulfill_tx = bdb_driver.transactions.fulfill(create_tx, alice_keypair['private_key'])
+    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=fulfill_tx,
                                           recipients=bob_keypair['public_key'])
     transfer_to_carly_tx = make_transfer_tx(
         bdb_driver, input_tx=transfer_to_bob_tx, recipients=carly_keypair['public_key'])
