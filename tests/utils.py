@@ -5,8 +5,8 @@ from pytest import fail
 
 def poll_bdb_transaction_valid(driver, tx_id):
     return poll_result(
-        lambda: driver.transactions.status(tx_id),
-        lambda result: result.get('status') == 'valid')
+        lambda: driver.blocks.get(txid=tx_id),
+        lambda result: result is not None ) 
 
 
 def poll_bdb_transaction(driver, tx_id):

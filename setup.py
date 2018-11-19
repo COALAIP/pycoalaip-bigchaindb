@@ -11,7 +11,7 @@ with open('HISTORY.rst') as history_file:
 
 install_requires = [
     'coalaip==0.0.3',
-    'bigchaindb_driver~=0.4.0',
+    'bigchaindb_driver~=0.6.2',
 ]
 
 tests_require = [
@@ -21,7 +21,7 @@ tests_require = [
     'pytest>=3.0.1',
     'pytest-cov',
     'pytest-mock',
-    'bigchaindb~=1.0.1',
+    'bigchaindb~=2.0.0b7',
 ]
 
 dev_require = [
