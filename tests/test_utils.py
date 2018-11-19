@@ -53,7 +53,7 @@ def test_order_transactions(bdb_driver, alice_keypair, bob_keypair):
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
-    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=fulfill_tx,
+    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=create_tx,
                                           recipients=bob_keypair['public_key'])
     transfer_back_to_alice_tx = make_transfer_tx(
         bdb_driver, input_tx=transfer_to_bob_tx, recipients=alice_keypair['public_key'])
@@ -71,7 +71,7 @@ def test_order_transactions_is_correct_without_create(
     create_tx = bdb_driver.transactions.prepare(
         operation='CREATE',
         signers=alice_keypair['public_key'])
-    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=fulfill_tx,
+    transfer_to_bob_tx = make_transfer_tx(bdb_driver, input_tx=create_tx,
                                           recipients=bob_keypair['public_key'])
     transfer_back_to_alice_tx = make_transfer_tx(
         bdb_driver, input_tx=transfer_to_bob_tx, recipients=alice_keypair['public_key'])
